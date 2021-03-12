@@ -1,0 +1,43 @@
+## Gas Mixer 
+alias PipeAnalyzerP1 d0
+alias PipeAnalyzerP2 d1
+alias PipeAnalyzerO1 d2
+alias Mixer d3
+##
+define MinPressure 500 #kPA
+define MaxPressure 1000 #kPA
+define PercentP1 78
+define PercentP2 22
+##
+alias Ratio r10
+alias Running r11
+div Ratio PercentP1 PercentP2
+#
+loop: 
+l r0 PipeAnalyzerO1 Pressure
+bgeal r0 MaxPressure turnoff
+bleal r0 MinPressure turnon
+bgtzal Running setratio
+yield 
+j loop
+
+
+setratio:
+l r0 PipeAnalyzerP1 Temperature
+l r1 PipeAnalyzerP2 Temperature
+mul r0 r0 Ratio
+add r1 r1 r0
+div r0 r0 r1
+mul r0 r0 100
+s Mixer Ratio r0
+j ra
+
+turnon:
+move Running 1
+s Mixer On Running
+
+j ra
+turnoff:
+move Running 0
+s Mixer On Running
+j ra
