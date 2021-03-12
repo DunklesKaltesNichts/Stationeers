@@ -1,0 +1,47 @@
+###
+alias Door d0
+alias GasSensor1 d1
+alias GasSensor2 d2
+alias FlashLight1 d3
+alias FlashLight2 d4
+
+##
+define CloseTimer 10 #Seconds
+define MaxPressureDiff 20 #kPA
+
+##
+alias CurrentPressure1 r13
+alias CurrentPressure2 r14
+alias TimerRunning r15
+
+loop:
+l CurrentPressure1 GasSensor1 Pressure
+l CurrentPressure2 GasSensor2 Pressure
+sub r10 CurrentPressure1 CurrentPressure2
+abs r10 r10
+bgtal r10 MaxPressureDiff turnoff
+bltal r10 MaxPressureDiff turnon
+breqz CloseTimer 3
+l r0 Door Open
+bgtzal r0 dooropen
+yield
+j loop
+
+dooropen:
+brgtz TimerRunning 3
+move TimerRunning CloseTimer
+add TimerRunning TimerRunning 1
+sub TimerRunning TimerRunning 1
+brgtz TimerRunning 2
+s Door Open 0
+j ra
+
+turnon:
+s Door Power 1
+j ra
+turnoff:
+brdns FlashLight1 1
+s Door Open 0
+s Door Power 0
+move TimerRunning 0
+j loop
