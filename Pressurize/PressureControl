@@ -1,104 +1,108 @@
 ###
 # Variables
-define Flow 50 # Default Value
-define Pressure 80  # Default Value
+define dFlow 10 # Default Value
+define dPressure 80  # Default Value
+define dLogicMemory 0 # 0: Vent, 1:Logic Memory
 # Dont edit below this line
-alias PumpIn d0
-alias PumpOut d1
-alias DisplayLed d2 # Optional 
-alias DialMode d3 # Optional, recommended
-alias DialFlow d4 # Optional
-alias DialPressure d5 # Optional
+alias dVentIn d0
+alias dVentOut d1
+alias dDisplayLed d2 # Optional 
+alias dDialMode d3 # Optional, recommended
+alias dDialFlow d4 # Optional
+alias dDialPressure d5 # Optional
 # Internal Variables
-alias GasSensorHash r2
-move GasSensorHash -1252983604
-alias Temp1 r0 # Temporary data 1
-alias Temp2 r1 # Temporary data 2
-alias TargetPumpIn r3 
-alias TargetPumpOut r4 
-alias SetDisplayValue r5 
-alias SetDisplayColor r6 
-alias CurrentPressure r7 
-alias TargetMode r15  
-move TargetMode 1 
-brdns DialMode 3
-move TargetMode 0 
-s DialMode Settings TargetMode
-alias TargetFlow r14
-move TargetFlow Flow
-brdns DialFlow 2
-s DialFlow Settings TargetFlow
-alias TargetPressure r13
-move TargetPressure Pressure
-brdns DialPressure 2
-s DialPressure Settings TargetPressure
+alias rGasSensorHash r2
+move rGasSensorHash -1252983604
+alias rTemp1 r0 # Temporary data 1
+alias rTemp2 r1 # Temporary data 2
+alias rTargetVentIn r3 
+alias rTargetVentOut r4 
+alias rSetDisplayValue r5 
+alias rSetDisplayColor r6 
+alias rCurrentPressure r7 
+alias rTargetMode r15  
+alias rTargetVentPower r8
+move rTargetMode 1 
+brdns dDialMode 3
+move rTargetMode 0 
+s dDialMode Setting rTargetMode
+alias rTargetFlow r14
+move rTargetFlow dFlow
+brdns dDialFlow 2
+s dDialFlow Setting rTargetFlow
+alias rTargetPressure r13
+move rTargetPressure dPressure
+brdns dDialPressure 2
+s dDialPressure Setting rTargetPressure
 loop:
-bdns DialMode automatic
+bdns dDialMode automatic
 j dialmodepresent
 j loop
 dialmodepresent:
-l Temp1 DialMode Settings
-brne Temp1 3 6
-move TargetPumpIn 100
-move TargetPumpOut 0
-move SetDisplayValue 3
-move SetDisplayColor 4
+l rTemp1 dDialMode Setting
+brne rTemp1 3 7
+mul rTemp1 dFlow 2
+move rTargetVentPower 0
+move rTargetVentIn rTemp1
+move rTargetVentOut 0
+move rSetDisplayValue 3
+move rSetDisplayColor 4
 j doit
-brne Temp1 2 6
-move TargetPumpIn 0
-move TargetPumpOut 100
-move SetDisplayValue 2
-move SetDisplayColor 5
+brne rTemp1 2 7
+move rTargetVentPower 1
+move rTargetVentIn 0
+mul rTemp1 dFlow 2
+move rTargetVentOut rTemp2
+move rSetDisplayValue 2
+move rSetDisplayColor 5
 j doit
-beq Temp1 1 automatic
-move TargetPumpIn 0
-move TargetPumpOut 0
-move SetDisplayValue 0
-move SetDisplayColor 2
+beq rTemp1 1 automatic
+move rTargetVentPower 0
+move rSetDisplayValue 0
+move rSetDisplayColor 2
 j doit
 j loop
 automatic:
 yield
-lb CurrentPressure GasSensorHash Pressure 0
-div Temp1 TargetPressure 2
-brge CurrentPressure Temp1 6
-move TargetPumpIn 0
-move TargetPumpOut 0
-move SetDisplayValue 99.1
-move SetDisplayColor 10
+lb rCurrentPressure rGasSensorHash Pressure 0
+div rTemp1 rTargetPressure 2
+brge rCurrentPressure rTemp1 6
+move rTargetVentIn 0
+move rTargetVentOut 0
+move rSetDisplayValue 99.1
+move rSetDisplayColor 10
 j doit
-brdns DialFlow 2
-l TargetFlow DialFlow Settings
-brgtz TargetFlow 6
-move TargetPumpIn 0
-move TargetPumpOut 0
-move SetDisplayValue 99.2
-move SetDisplayColor 10
-j doit
-brdns DialPressure 2
-l TargetPressure DialPressure Settings
-div Temp1 CurrentPressure TargetPressure
-sub Temp1 1 Temp1
-mul Temp1 Temp1 TargetFlow
+brdns dDialFlow 2
+l rTargetFlow dDialFlow Setting
+div rTargetFlow rTargetFlow 2
+brdns dDialPressure 2
+l rTargetPressure dDialPressure Setting
+div rTemp1 rCurrentPressure rTargetPressure
+mul rTemp1 rTemp1 rTemp1
+sub rTemp1 1 rTemp1
+mul rTemp1 rTemp1 rTargetPressure
+add rTemp1 rTemp1 rTargetFlow
 # Volume In
-add TargetPumpIn Temp1 TargetFlow
-round TargetPumpIn TargetPumpIn
-brle TargetPumpIn 100 2
-move TargetPumpIn 100
-# VolumeOut
-sub TargetPumpOut TargetFlow Temp1
-round TargetPumpOut TargetPumpOut
-brge TargetPumpOut 0 2
-move TargetPumpOut 0
-div Temp2 TargetPumpOut 100
-add SetDisplayValue TargetPumpIn Temp2
-move SetDisplayColor 2
+add rTargetVentIn rTemp1 rTargetPressure
+round rTargetVentIn rTargetVentIn
+sub rTargetVentOut rTargetPressure rTemp1
+round rTargetVentOut rTargetVentOut
+#set DisplayValue
+div rTemp2 rTargetVentOut 100
+add rSetDisplayValue rTargetVentIn rTemp2
+move rSetDisplayColor 2
 j doit
 j loop
 doit: 
-s PumpOut Settings TargetPumpOut
-s PumpIn Settings TargetPumpIn
-brdns DisplayLed 3
-s DisplayLed Settings SetDisplayValue
-s DisplayLed Color SetDisplayColor
+brgtz dLogicMemory 6
+s dVentOut Power rTargetVentPower
+s dVentOut PressureExternal rTargetVentOut
+s dVentIn Power rTargetVentPower
+s dVentIn PressureExternal rTargetVentIn
+jr 3 
+s dVentOut Setting rTargetVentOut
+s dVentIn Setting rTargetVentIn
+brdns dDisplayLed 3
+s dDisplayLed Setting rSetDisplayValue
+s dDisplayLed Color rSetDisplayColor
 j loop
