@@ -2,11 +2,11 @@
 # Variables
 define dFlow 10 # Default Value
 define dPressure 80  # Default Value
-define dLogicMemory 0 # 0: Vent, 1:Logic Memory
+define dLogicMemory 1 # 0: Vent, 1:Logic Memory
 # Dont edit below this line
 alias dVentIn d0
 alias dVentOut d1
-alias dDisplayLed d2 # Optional 
+alias dDisplayLed d2 # Optional
 alias dDialMode d3 # Optional, recommended
 alias dDialFlow d4 # Optional
 alias dDialPressure d5 # Optional
@@ -15,16 +15,16 @@ alias rGasSensorHash r2
 move rGasSensorHash -1252983604
 alias rTemp1 r0 # Temporary data 1
 alias rTemp2 r1 # Temporary data 2
-alias rTargetVentIn r3 
-alias rTargetVentOut r4 
-alias rSetDisplayValue r5 
-alias rSetDisplayColor r6 
-alias rCurrentPressure r7 
-alias rTargetMode r15  
+alias rTargetVentIn r3
+alias rTargetVentOut r4
+alias rSetDisplayValue r5
+alias rSetDisplayColor r6
+alias rCurrentPressure r7
+alias rTargetMode r15
 alias rTargetVentPower r8
-move rTargetMode 1 
+move rTargetMode 1
 brdns dDialMode 3
-move rTargetMode 0 
+move rTargetMode 0
 s dDialMode Setting rTargetMode
 alias rTargetFlow r14
 move rTargetFlow dFlow
@@ -40,19 +40,18 @@ j dialmodepresent
 j loop
 dialmodepresent:
 l rTemp1 dDialMode Setting
-brne rTemp1 3 7
-mul rTemp1 dFlow 2
+brne rTemp1 3 8
+mul rTemp1 dPressure 2
 move rTargetVentPower 0
 move rTargetVentIn rTemp1
-move rTargetVentOut 0
+move rTargetVentOut rTemp1
 move rSetDisplayValue 3
 move rSetDisplayColor 4
 j doit
 brne rTemp1 2 7
 move rTargetVentPower 1
 move rTargetVentIn 0
-mul rTemp1 dFlow 2
-move rTargetVentOut rTemp2
+move rTargetVentOut 0
 move rSetDisplayValue 2
 move rSetDisplayColor 5
 j doit
@@ -78,14 +77,13 @@ div rTargetFlow rTargetFlow 2
 brdns dDialPressure 2
 l rTargetPressure dDialPressure Setting
 div rTemp1 rCurrentPressure rTargetPressure
-mul rTemp1 rTemp1 rTemp1
 sub rTemp1 1 rTemp1
 mul rTemp1 rTemp1 rTargetPressure
 add rTemp1 rTemp1 rTargetFlow
 # Volume In
 add rTargetVentIn rTemp1 rTargetPressure
 round rTargetVentIn rTargetVentIn
-sub rTargetVentOut rTargetPressure rTemp1
+sub rTargetVentOut rTargetVentIn dFlow
 round rTargetVentOut rTargetVentOut
 #set DisplayValue
 div rTemp2 rTargetVentOut 100
@@ -93,13 +91,13 @@ add rSetDisplayValue rTargetVentIn rTemp2
 move rSetDisplayColor 2
 j doit
 j loop
-doit: 
+doit:
 brgtz dLogicMemory 6
 s dVentOut Power rTargetVentPower
 s dVentOut PressureExternal rTargetVentOut
 s dVentIn Power rTargetVentPower
 s dVentIn PressureExternal rTargetVentIn
-jr 3 
+jr 3
 s dVentOut Setting rTargetVentOut
 s dVentIn Setting rTargetVentIn
 brdns dDisplayLed 3
