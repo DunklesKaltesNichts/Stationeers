@@ -35,24 +35,29 @@ move rTargetPressure dPressure
 brdns dDialPressure 2
 s dDialPressure Setting rTargetPressure
 loop:
+lb rCurrentPressure rGasSensorHash Pressure 0
 bdns dDialMode automatic
 j dialmodepresent
 j loop
 dialmodepresent:
 l rTemp1 dDialMode Setting
-brne rTemp1 3 8
-mul rTemp1 dPressure 2
-move rTargetVentPower 0
+brne rTemp1 3 10
+mul rTemp1 rTargetPressure 2
+move rTargetVentPower 1
 move rTargetVentIn rTemp1
 move rTargetVentOut rTemp1
 move rSetDisplayValue 3
+div rTemp1 rCurrentPressure 100
+add rSetDisplayValue rSetDisplayValue rTemp1
 move rSetDisplayColor 4
 j doit
-brne rTemp1 2 7
+brne rTemp1 2 9
 move rTargetVentPower 1
 move rTargetVentIn 0
 move rTargetVentOut 0
 move rSetDisplayValue 2
+div rTemp1 rCurrentPressure 100
+add rSetDisplayValue rSetDisplayValue rTemp1
 move rSetDisplayColor 5
 j doit
 beq rTemp1 1 automatic
@@ -63,7 +68,6 @@ j doit
 j loop
 automatic:
 yield
-lb rCurrentPressure rGasSensorHash Pressure 0
 div rTemp1 rTargetPressure 2
 brge rCurrentPressure rTemp1 6
 move rTargetVentIn 0
@@ -71,23 +75,18 @@ move rTargetVentOut 0
 move rSetDisplayValue 99.1
 move rSetDisplayColor 10
 j doit
-brdns dDialFlow 2
+brdns dDialFlow 3
 l rTargetFlow dDialFlow Setting
 div rTargetFlow rTargetFlow 2
 brdns dDialPressure 2
 l rTargetPressure dDialPressure Setting
-div rTemp1 rCurrentPressure rTargetPressure
-sub rTemp1 1 rTemp1
-mul rTemp1 rTemp1 rTargetPressure
-add rTemp1 rTemp1 rTargetFlow
-# Volume In
-add rTargetVentIn rTemp1 rTargetPressure
+add rTargetVentIn rTargetPressure rTargetFlow
 round rTargetVentIn rTargetVentIn
-sub rTargetVentOut rTargetVentIn dFlow
+sub rTargetVentOut rTargetPressure rTargetFlow
 round rTargetVentOut rTargetVentOut
-#set DisplayValue
-div rTemp2 rTargetVentOut 100
-add rSetDisplayValue rTargetVentIn rTemp2
+move rSetDisplayValue rTargetPressure
+div rTemp1 rCurrentPressure 100
+add rSetDisplayValue rSetDisplayValue rTemp1
 move rSetDisplayColor 2
 j doit
 j loop
@@ -97,7 +96,8 @@ s dVentOut Power rTargetVentPower
 s dVentOut PressureExternal rTargetVentOut
 s dVentIn Power rTargetVentPower
 s dVentIn PressureExternal rTargetVentIn
-jr 3
+jr 4
+sb  -890946730 Power rTargetVentPower
 s dVentOut Setting rTargetVentOut
 s dVentIn Setting rTargetVentIn
 brdns dDisplayLed 3
