@@ -1,0 +1,52 @@
+define vTarTemperature 20 # Celsius
+# Dont Edit below this Line
+# Devices
+# Main String
+alias dMIAnalyzer d0
+# Cooling String
+alias dCIAnalyzer d1
+# Heating String
+alias dHIAnalyzer d2
+# Output after Mixer
+alias dMOAnalyzer d3
+alias dCOMixer d4
+alias dHOMixer d5
+# Register
+alias rMICurTemperature r0
+alias rCICurTemperature r1
+alias rHICurTemperature r2
+alias rMOCurTemperature r3
+alias rCOMixerRatio r4
+alias rHOMixerRatio r5
+alias rTemp1 r10
+alias rTemp2 r11
+alias rTemp3 r12
+jloop:
+l rMICurTemperature dMIAnalyzer Temperature
+breq rMICurTemperature vTarTemperature 3
+bgt rMICurTemperature vTarTemperature jcooling
+blt rMICurTemperature vTarTemperature jheating
+move rCOMixerRatio 0
+move rHOMixerRatio 0
+j jdoit
+j jloop
+jcooling:
+l rCICurTemperature dCIAnalyzer Temperature
+sub rCICurTemperature rCICurTemperature 1
+add rMICurTemperature rMICurTemperature 1
+move rTemp1 rCICurTemperature
+move rTemp2 rMICurTemperature
+move rTemp3 0
+jal jcalcratio
+j jloop
+jheating:
+l rHICurTemperature dHIAnalyzer Temperature
+j jloop
+
+
+jdoit:
+j jloop
+
+jcalcratio:
+
+j ra
