@@ -1,0 +1,66 @@
+define vMaxPressure 1000 #kPA
+define vMaxFlow 100 # Liters
+define vMinFlow 5 # Liters
+# Dont Edit below this Line
+# Devices
+# String 1
+alias dI1Analyzer d0
+alias dO1Pump d3
+# String 2
+alias dI2Analyzer d1
+alias dO2Pump d4
+# String 3
+alias dI3Analyzer d2
+alias dO3Pump d5
+# Register
+alias rI1CurrentPressure r0
+alias rO1TargetFlow r1
+alias rO1TargetPower r2
+alias rI2CurrentPressure r3
+alias rO2TargetFlow r4
+alias rO2TargetPower r5
+alias rI3CurrentPressure r6
+alias rO3TargetFlow r7
+alias rO3TargetPower r8
+alias rTemp1 r10
+alias rTemp2 r11
+alias rTemp3 r12
+loop:
+l rI1CurrentPressure dI1Analyzer Pressure 
+brge rI1CurrentPressure vMaxPressure 7
+move rTemp1 rI1CurrentPressure 
+move rTemp2 0
+move rTemp3 0
+jal calcflow
+move rO1TargetFlow rTemp2
+move rO1TargetPower rTemp3
+jr 2
+move rO1TargetPower 0
+l rI2CurrentPressure dI2Analyzer Pressure
+brge rI2CurrentPressure vMaxPressure 7
+move rTemp1 rI2CurrentPressure 
+move rTemp2 0
+move rTemp3 0
+jal calcflow
+move rO2TargetFlow rTemp2
+move rO2TargetPower rTemp3
+jr 2
+move rO2TargetPower 0
+l rI3CurrentPressure dI3Analyzer Pressure
+brge rI3CurrentPressure vMaxPressure 7
+move rTemp1 rI3CurrentPressure 
+move rTemp2 0
+move rTemp3 0
+jal calcflow
+move rO3TargetFlow rTemp2
+move rO3TargetPower rTemp3
+jr 2
+move rO3TargetPower 0
+j loop
+calcflow:
+div rTemp1 rTemp1 vMaxPressure
+sub rTemp1 1 rTemp1
+mul rTemp2 rTemp1 vMaxFlow
+brlt rTemp2 vMinFlow 2
+move rTemp3 1
+j ra
