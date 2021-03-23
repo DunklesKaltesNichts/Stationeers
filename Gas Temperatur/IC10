@@ -1,4 +1,5 @@
-define vTarTemperature 20 # Celsius
+define vTarTemperature 25# Celsius
+define vMaxPressure 1000 #kPa
 # Dont Edit below this Line
 # Devices
 # Main String
@@ -16,37 +17,57 @@ alias rMICurTemperature r0
 alias rCICurTemperature r1
 alias rHICurTemperature r2
 alias rMOCurTemperature r3
-alias rCOMixerRatio r4
-alias rHOMixerRatio r5
+alias rMOCurPressure r4
+alias rCOMixerRatio r5
+alias rHOMixerRatio r6
+alias rMixerPower r7
 alias rTemp1 r10
 alias rTemp2 r11
 alias rTemp3 r12
+alias rTemp4 r13
 jloop:
+l rMOCurPressure dMOAnalyzer Pressure
+brgt rMOCurPressure vMaxPressure 6
 l rMICurTemperature dMIAnalyzer Temperature
-breq rMICurTemperature vTarTemperature 3
+breq rMICurTemperature vTarTemperature 4
+move rMixerPower 1
 bgt rMICurTemperature vTarTemperature jcooling
 blt rMICurTemperature vTarTemperature jheating
-move rCOMixerRatio 0
-move rHOMixerRatio 0
+move rCOMixerRatio 100
+move rHOMixerRatio 100
+move rMixerPower 0
 j jdoit
 j jloop
 jcooling:
 l rCICurTemperature dCIAnalyzer Temperature
-sub rCICurTemperature rCICurTemperature 1
-add rMICurTemperature rMICurTemperature 1
-move rTemp1 rCICurTemperature
-move rTemp2 rMICurTemperature
+move rTemp1 rMICurTemperature
+move rTemp2 rCICurTemperature
 move rTemp3 0
+move rTemp4 0
 jal jcalcratio
+move rCOMixerRatio rTemp4
+move rHOMixerRatio 100
 j jloop
 jheating:
 l rHICurTemperature dHIAnalyzer Temperature
+move rTemp1 rMICurTemperature
+move rTemp2 rHICurTemperature
+move rTemp3 0
+move rTemp4 0
+jal jcalcratio
+move rCOMixerRatio 100
+move rHOMixerRatio rTemp4
+move rMixerPower 1
 j jloop
 
 
 jdoit:
 j jloop
-
 jcalcratio:
-
+sub rTemp3 rTemp2 rTemp1
+div rTemp3 100 rTemp3
+mul rTemp4 rTemp2 rTemp1 
+div rTemp4 rTemp4 vTarTemperature
+sub rTemp4 rTemp4 rTemp1
+mul rTemp4 rTemp4 rTemp3
 j ra
