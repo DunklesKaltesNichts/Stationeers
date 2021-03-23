@@ -55,7 +55,7 @@ jal calcflow
 move rO3TargetFlow rTemp2
 move rO3TargetPower rTemp3
 jr 2
-move rO3TargetPower 8
+move rO3TargetPower 0
 jal doit
 j loop
 calcflow:
