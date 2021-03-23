@@ -27,7 +27,7 @@ alias rTemp2 r11
 alias rTemp3 r12
 loop:
 l rI1CurrentPressure dI1Analyzer Pressure 
-brge rI1CurrentPressure vMaxPressure 7
+brge rI1CurrentPressure vMaxPressure 8
 move rTemp1 rI1CurrentPressure 
 move rTemp2 0
 move rTemp3 0
@@ -37,7 +37,7 @@ move rO1TargetPower rTemp3
 jr 2
 move rO1TargetPower 0
 l rI2CurrentPressure dI2Analyzer Pressure
-brge rI2CurrentPressure vMaxPressure 7
+brge rI2CurrentPressure vMaxPressure 8
 move rTemp1 rI2CurrentPressure 
 move rTemp2 0
 move rTemp3 0
@@ -47,7 +47,7 @@ move rO2TargetPower rTemp3
 jr 2
 move rO2TargetPower 0
 l rI3CurrentPressure dI3Analyzer Pressure
-brge rI3CurrentPressure vMaxPressure 7
+brge rI3CurrentPressure vMaxPressure 8
 move rTemp1 rI3CurrentPressure 
 move rTemp2 0
 move rTemp3 0
@@ -55,7 +55,8 @@ jal calcflow
 move rO3TargetFlow rTemp2
 move rO3TargetPower rTemp3
 jr 2
-move rO3TargetPower 0
+move rO3TargetPower 8
+jal doit
 j loop
 calcflow:
 div rTemp1 rTemp1 vMaxPressure
@@ -63,4 +64,12 @@ sub rTemp1 1 rTemp1
 mul rTemp2 rTemp1 vMaxFlow
 brlt rTemp2 vMinFlow 2
 move rTemp3 1
+j ra
+doit:
+s dO1Pump Setting rO1TargetFlow
+s dO1Pump Power rO1TargetPower
+s dO2Pump Setting rO2TargetFlow
+s dO2Pump Power rO2TargetPower
+s dO3Pump Setting rO3TargetFlow
+s dO3Pump Power rO3TargetPower
 j ra
