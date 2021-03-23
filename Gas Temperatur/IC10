@@ -1,5 +1,6 @@
 define vTarTemperature 25# Celsius
 define vMaxPressure 1000 #kPa
+define vMinPressure 500 #kPa
 # Dont Edit below this Line
 # Devices
 # Main String
@@ -27,14 +28,17 @@ alias rTemp3 r12
 alias rTemp4 r13
 jloop:
 l rMOCurPressure dMOAnalyzer Pressure
-brgt rMOCurPressure vMaxPressure 6
-l rMICurTemperature dMIAnalyzer Temperature
-breq rMICurTemperature vTarTemperature 4
+brgt rMOCurPressure vMaxPressure 11
+brlt vMinPressure rMOCurPressure 2
 move rMixerPower 1
+beqz rMixerPower jloop
+l rMICurTemperature dMIAnalyzer Temperature
+brne rMICurTemperature vTarTemperature 5
+move rHOMixerRatio 100
+move rCOMixerRatio 100
+j jdoit
 bgt rMICurTemperature vTarTemperature jcooling
 blt rMICurTemperature vTarTemperature jheating
-move rCOMixerRatio 100
-move rHOMixerRatio 100
 move rMixerPower 0
 j jdoit
 j jloop
@@ -47,6 +51,7 @@ move rTemp4 0
 jal jcalcratio
 move rCOMixerRatio rTemp4
 move rHOMixerRatio 100
+j jdoit
 j jloop
 jheating:
 l rHICurTemperature dHIAnalyzer Temperature
@@ -57,11 +62,14 @@ move rTemp4 0
 jal jcalcratio
 move rCOMixerRatio 100
 move rHOMixerRatio rTemp4
-move rMixerPower 1
+j jdoit
 j jloop
-
-
 jdoit:
+s dCOMixer Power rMixerPower
+s dHOMixer Power rMixerPower
+s dCOMixer Setting rCOMixerRatio
+s dHOMixer Setting rHOMixerRatio
+yield
 j jloop
 jcalcratio:
 sub rTemp3 rTemp2 rTemp1
