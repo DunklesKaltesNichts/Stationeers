@@ -1,0 +1,43 @@
+define vTargetTemp 20 #TargetTemp C
+define vHeaterCount 50 #Numbers of Heaters
+define vDegHeater 0.25
+### Nothing to edit
+alias devSensorTemp d0
+alias devMemHeatCount d1
+alias devTempDial d2 # Optional
+alias rCurTemp r0
+alias rTargetTemp r1
+alias rAllTemp r2
+alias rTargetHeaters r3
+alias rTemp1 r13
+alias rTemp2 r14
+alias rTemp3 r15
+init:
+brdns devTempDial 2
+s devTempDial Setting vTargetTemp
+loop:
+brdns devTempDial 2
+l rTargetTemp devTempDial Setting
+add rTargetTemp rTargetTemp 273.15
+mul rTemp1 vDegHeater vHeaterCount
+sub rAllTemp rTargetTemp rTemp1
+l rCurTemp devSensorTemp Temperature
+ble rCurTemp rAllTemp mintemp
+bgt rCurTemp rTargetTemp maxtemp
+sub rTemp1 rAllTemp rCurTemp
+sub rTemp2 rAllTemp rTargetTemp
+div rTargetHeaters rTemp1 rTemp2
+sub rTargetHeaters 1 rTargetHeaters
+mul rTargetHeaters rTargetHeaters vHeaterCount
+round rTargetHeaters rTargetHeaters
+j doit
+mintemp:
+move rTargetHeaters vHeaterCount
+j doit
+maxtemp:
+move rTargetHeaters 0 
+j loop
+doit:
+s devMemHeatCount Setting rTargetHeaters
+yield
+j loop
