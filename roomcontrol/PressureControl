@@ -1,0 +1,88 @@
+define cPressure 100 # kPa default
+define cFlow 10 # kPa default
+# Mode 0 Off, 1 Auto, 2 Pressurize
+# Only with Dial
+define cMode 0
+define cLEDHash 1944485013
+## Nothing to edit
+# Devices
+alias dGasSensor d0
+alias dVentRoomIn d1
+alias dVentRoomOut d2
+alias dDialFlow d3 # Optional
+alias dDialPressure d4 # Optional
+alias dDialMode d5 # Optional
+# Registers
+alias rCurPres r0
+alias rTarPresIn r1
+alias rTarPresOut r2
+alias rCurMode r3
+alias rLED r4
+alias rPressure r5
+alias rVentPower r7
+alias rFlow r6
+alias rTemp1 r15
+init:
+move rPressure cPressure
+move rFlow cFlow
+move rCurMode cMode
+brdns dDialFlow 2
+s dDialFlow Setting rFlow
+brdns dDialPressure 2
+s dDialPressure Setting rPressure
+brdns dDialMode 2
+s dDialMode Setting rCurMode
+loop:
+brdns dDialMode 6
+l rTemp1 dDialMode Setting
+move rCurMode rTemp1
+beq rCurMode 2 pressurize
+beq rCurMode 1 automatic
+j offline
+move rCurMode 1
+move rVentPower 1
+j automatic
+yield
+j loop
+automatic:
+brdns dDialFlow 2
+l rFlow dDialFlow Setting
+brdns dDialPressure 2
+l rPressure dDialPressure Setting
+l rCurPres dGasSensor Pressure
+div rTemp1 rPressure 2
+blt rCurPres rTemp1 lowpressure
+div rTemp1 rFlow 2
+add rTarPresIn rPressure rTemp1
+sub rTarPresOut rPressure rTemp1
+move rLED 2
+move rVentPower 1
+j doit
+j loop
+lowpressure:
+move rVentPower 0
+move rCurMode 0
+move rLED 4
+j doit
+j loop
+pressurize:
+move rTarPresIn rPressure
+move rTarPresOut rPressure
+move rVentPower 1
+move rLED 5
+j doit
+offline:
+move rVentPower 0
+move rLED 7
+j doit
+doit:
+s db setting rCurMode
+breqz rVentPower 3
+s dVentRoomIn PressureExternal rTarPresIn
+s dVentRoomOut PressureExternal rTarPresOut
+s dVentRoomIn On rVentPower
+s dVentRoomOut On rVentPower
+sb cLEDHash Color rLED
+sb cLEDHash On 1
+yield
+j loop
