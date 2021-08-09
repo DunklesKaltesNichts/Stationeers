@@ -26,6 +26,8 @@ init:
 move rPressure cPressure
 move rFlow cFlow
 move rCurMode cMode
+s dVentRoomOut Mode 1
+s dVentRoomIn Mode 0
 brdns dDialFlow 2
 s dDialFlow Setting rFlow
 brdns dDialPressure 2
