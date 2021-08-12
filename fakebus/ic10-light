@@ -1,0 +1,40 @@
+#Address of the chip in the "channel
+define cAddress  12 
+# some kind of Bitmask
+# Light 1: 1
+# Light 2: 2
+# light 3: 4
+# Light 4: 8
+# Light 5: 16
+# Just add the values
+#
+## Nothing to edit
+alias dLight1 d0
+alias dLight2 d1
+alias dLight3 d2
+alias dLight4 d3
+alias dLight5 d4
+alias dMemory d5
+alias rCommand r1
+alias rTemp1 r11
+alias rTemp2 r12
+alias rCounter r13
+MainLoop:
+l rCommand dMemory Setting
+div rTemp1 rCommand 100
+trunc rTemp1 rTemp1
+bne rTemp1 cAddress MainLoop
+mul rTemp1 cAddress 100
+sub rTemp1 rCommand rTemp1
+jal startMask
+j MainLoop
+startMask:
+move rCounter 0
+loop:
+trunc rTemp1 rTemp1
+mod rTemp2 rTemp1 2
+div rTemp1 rTemp1 2
+s dr13 On rTemp2
+add rCounter rCounter 1
+blt rCounter 5 loop
+j ra
