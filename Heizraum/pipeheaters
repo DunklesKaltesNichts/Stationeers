@@ -15,6 +15,7 @@ alias rTemp3 r15
 init:
 brdns devTempDial 2
 s devTempDial Setting vTargetTemp
+move rTargetTemp vTargetTemp
 loop:
 brdns devTempDial 2
 l rTargetTemp devTempDial Setting
