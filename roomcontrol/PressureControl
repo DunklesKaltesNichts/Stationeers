@@ -32,8 +32,10 @@ brdns dDialFlow 2
 s dDialFlow Setting rFlow
 brdns dDialPressure 2
 s dDialPressure Setting rPressure
-brdns dDialMode 2
+brdns dDialMode 3
 s dDialMode Setting rCurMode
+j loop
+move dDialMode 1 # Default, no Mode Dial 
 loop:
 brdns dDialMode 6
 l rTemp1 dDialMode Setting
