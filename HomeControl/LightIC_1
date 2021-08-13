@@ -1,8 +1,8 @@
-define cICCount 4 # 0,1,2,3(,4,5)
+define cICCount 1 # 0,1,2,3(,4,5)
 alias rICCount r4
 move rICCount cICCount
 alias rCounter1 r0
-alias rCounter2 r1 
+alias rCounter2 r1
 alias rCommand r2
 alias rRunning r3
 alias rTemp1 r10
@@ -27,15 +27,27 @@ j MainLoop
 RunningLightStart:
 move rCounter1 0
 move rRunning 1
-RunningLightLoop:
+RunningLightLoopOff:
+
+s dr0 Setting 0
+
+add rCounter1 rCounter1 1
+ble rCounter1 rICCount RunningLightLoopOff
+move rCounter1 0
+RunningLightLoopOn:
 s dr0 Setting 1
+yield
 s dr0 Setting 2
+yield
 s dr0 Setting 4
+yield
 s dr0 Setting 8
+yield
 s dr0 Setting 16
+yield
 s dr0 Setting 0
 add rCounter1 rCounter1 1
-ble rCounter1 rICCount RunningLightLoop
+ble rCounter1 rICCount RunningLightLoopOn
 j MainLoop
 FillingLightStart:
 move rCounter1 0
@@ -47,10 +59,15 @@ ble rCounter1 rICCount FillingLightLoopOff
 move rCounter1 0
 FillingLightLoopOn:
 s dr0 Setting 1
+yield
 s dr0 Setting 3
+yield
 s dr0 Setting 7
+yield
 s dr0 Setting 15
+yield
 s dr0 Setting 31
+yield
 add rCounter1 rCounter1 1
 ble rCounter1 rICCount FillingLightLoopOn
 j MainLoop
