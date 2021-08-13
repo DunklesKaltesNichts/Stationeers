@@ -28,9 +28,7 @@ RunningLightStart:
 move rCounter1 0
 move rRunning 1
 RunningLightLoopOff:
-
 s dr0 Setting 0
-
 add rCounter1 rCounter1 1
 ble rCounter1 rICCount RunningLightLoopOff
 move rCounter1 0
