@@ -37,6 +37,6 @@ set the Flow in my greenhouse to 50. this sets the blowing in vent to 125 and th
   
 6561102:  
 Control room IC. 
-101: Pressure in oxygen tank low.
-102: Overpressure alarm in the oxygen tank. For information only. The overpressure valve runs autonomously.
-103: Oxygen Filter full.
+101: Pressure in oxygen tank low.  
+102: Overpressure alarm in the oxygen tank. For information only. The overpressure valve runs autonomously.  
+103: Oxygen Filter full.  
