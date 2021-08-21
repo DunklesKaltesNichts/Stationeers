@@ -1,0 +1,23 @@
+define cInitPressure 100
+define cInitFlow 10
+define cBusIAddress 40
+alias dBusMemory d5
+alias dGasSensor d0
+alias dVentRoomIn d1
+alias dVentRoomOut d2
+alias rTargetPressure r0
+alias rTargetFlow r1
+alias rTemp1 r15
+alias rTemp2 r14
+## Init
+div rTemp1 cInitFlow 100
+add rTemp1 cInitPressure rTemp1
+s db Setting rTemp1 
+jal doit
+
+doit:
+l rTemp1 db Setting 
+trunc rTargetPressure rTemp1
+sub rTargetFlow rTemp1 rTargetPressure
+s 
+j ra
