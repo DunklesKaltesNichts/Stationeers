@@ -35,7 +35,12 @@ Bitmask: 1, 2, 4, 8, 16
 60-65: Set the housing setting at the corresponding pin.  
 69: set all Pins  
 64102 > set the Housing setting at pin 4 (D3) to 102  
-For my light control to select the flow. (100: Off, 101: running light, 102: filling light, 103: all on)  
+For my light control to select the flow.  
+100: all off  
+101: running light  
+102: filling light  
+103: all on  
+112: Some lights flash, while others are permanently lit.
 
 Examples:
 
