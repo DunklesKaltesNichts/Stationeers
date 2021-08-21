@@ -30,7 +30,7 @@ For my light control to select the flow. (100: Off, 101: running light, 102: fil
 Examples:
 
 9969112:   
-Broadcast, set all housings to 112 > Storm, close the garage doors, activate lights and sirens.  
+Broadcast, set all housings to 112 > Storm in 60 seconds, close the garage doors, activate lights and sirens.  
 
 4052050:  
 set the Flow in my greenhouse to 50. this sets the blowing in vent to 125 and the blowing out vent to 75.    
