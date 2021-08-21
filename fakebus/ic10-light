@@ -20,13 +20,29 @@ alias rTemp1 r11
 alias rTemp2 r12
 alias rCounter r13
 MainLoop:
-l rCommand dMemory Setting
-div rTemp1 rCommand 100
-trunc rTemp1 rTemp1
-bne rTemp1 cAddress MainLoop
-mul rTemp1 cAddress 100
-sub rTemp1 rCommand rTemp1
-jal startMask
+l rTemp1 dBusMemory Setting
+blt rTemp1 1000000 MainLoop
+div rTemp2 rTemp1 100000
+trunc rTemp2 rTemp2
+seq rTemp3 rTemp2 99 #Broadcast
+seq rTemp4 rTemp2 cBusAddress
+nor rTemp4 rTemp4 rTemp3
+bnez rTemp4 MainLoop
+mul rTemp2 rTemp2 100000
+sub rTemp1 rTemp1 rTemp2
+div rTemp2 rTemp1 1000
+trunc rTemp2 rTemp2 # extract Command
+mul rTemp3 rTemp2 1000
+sub rTemp3 rTemp1 rTemp3 # extr Value
+brne rTemp2 51 4
+breq rTemp3 rTargetPressure 2
+move rTargetPressure rTemp3
+j calc
+brne rTemp2 52 4
+breq rTemp3 rTargetFlow 2
+move rTargetFlow rTemp3
+j calc
+yield
 j MainLoop
 startMask:
 move rCounter 0
