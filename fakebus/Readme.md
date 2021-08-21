@@ -1,10 +1,10 @@
 Protocol
 
-XXYYZZZ
+XXYYZZZ  
 
-XX: Address of IC10
-YY: Command
-ZZZ: Value
+XX: Address of IC10  
+YY: Command  
+ZZZ: Value  
 
 Address:
 99: Broadcast
