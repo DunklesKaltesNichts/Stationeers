@@ -27,6 +27,16 @@ Bitmask: 1, 2, 4, 8, 16
 64102 > set the Housing setting at pin 4 (D3) to 102  
 For my light control to select the flow. (100: Off, 101: running light, 102: filling light, 103: all on)  
 
-Examples  
-9969112: Broadcast, set all housings to 112 > Storm, close the garage doors, activate lights and sirens.  
-4052050: set the Flow in my greenhouse to 50. this sets the blowing in vent to 125 and the blowing out vent to 75.  
+Examples:
+
+9969112:   
+Broadcast, set all housings to 112 > Storm, close the garage doors, activate lights and sirens.  
+
+4052050:  
+set the Flow in my greenhouse to 50. this sets the blowing in vent to 125 and the blowing out vent to 75.    
+  
+6561102:  
+Control room IC. 
+101: Pressure in oxygen tank low.
+102: Overpressure alarm in the oxygen tank. For information only. The overpressure valve runs autonomously.
+103: Oxygen Filter full.
