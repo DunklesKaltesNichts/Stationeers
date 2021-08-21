@@ -36,7 +36,7 @@ Broadcast, set all housings to 112 > Storm in 60 seconds, close the garage doors
 set the Flow in my greenhouse to 50. this sets the blowing in vent to 125 and the blowing out vent to 75.    
   
 6561102:  
-Control room IC. 
+Control room IC.  
 101: Pressure in oxygen tank low.  
 102: Overpressure alarm in the oxygen tank. For information only. The overpressure valve runs autonomously.  
 103: Oxygen Filter full.  
