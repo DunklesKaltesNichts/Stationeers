@@ -1,0 +1,43 @@
+define cMaxSendTries 5
+##
+alias dBusMemory d0
+alias rTemp1 r13
+alias rTemp2 r14
+alias rTemp3 r15
+MainLoop:
+l rTemp1 db Setting
+beqz rTemp1 MainLoop
+blt rTemp1 1000000 MainLoop  >> Diese Zeile noch beim Empfänger rein
+jal send
+j MainLoop
+send:
+l rTemp2 dBusMemory Setting
+bnez rTemp2 sendwait
+s dBusMemory Setting rTemp1
+sleep 1
+s dBusMemory Setting 0
+s db Setting 0
+move rTemp1 0
+move rTemp2 0
+move rTemp3 0
+j ra
+sendwait:
+rand rTemp2
+round rTemp2 rTemp2
+breqz rTemp2 2
+yield
+rand rTemp2
+round rTemp2 rTemp2
+breqz rTemp2 2
+yield
+rand rTemp2
+round rTemp2 rTemp2
+breqz rTemp2 2
+yield
+add rTemp3 rTemp3 1
+blt rTemp3 cMaxSendTries send
+s db Setting 77753
+move rTemp1 0
+move rTemp2 0
+move rTemp3 0
+j MainLoop
