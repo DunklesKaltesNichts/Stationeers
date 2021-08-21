@@ -1,3 +1,5 @@
+It basically works like a shared bus, except that the "bus" here is a logic memory.  It is currently written by a single bus master and read by any number of ICs.
+
 This is certainly completely overkill and overcomplicated.  
 
 there is no return channel.
@@ -21,7 +23,6 @@ Bitmask: 1, 2, 4, 8, 16
 
 50-59: Room Pressure Controller  
 51: Set the desired room pressure.  
-
 52: Flow. actually, only a difference in the active vents in the Pressure external.  
 
 60-65: Set the housing setting at the corresponding pin.  
