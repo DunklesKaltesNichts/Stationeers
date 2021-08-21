@@ -29,7 +29,7 @@ Bitmask: 1, 2, 4, 8, 16
 50-59: Room Pressure Controller  
 51: Set the desired room pressure.  
 52: Flow. actually, only a difference in the active vents in the Pressure external.  
-(53: Evacuate. But can also be done with 51000.)
+(53: Evacuate. But can also be done with 51000 and 52000)
 
 
 60-65: Set the housing setting at the corresponding pin.  
