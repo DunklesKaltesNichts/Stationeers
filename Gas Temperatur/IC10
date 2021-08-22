@@ -1,81 +1,66 @@
-define vTarTemperature 25# Celsius
-define vMaxPressure 1000 #kPa
-define vMinPressure 500 #kPa
-# Dont Edit below this Line
-# Devices
-# Main String
-alias dMIAnalyzer d0
-# Cooling String
-alias dCIAnalyzer d1
-# Heating String
-alias dHIAnalyzer d2
-# Output after Mixer
-alias dMOAnalyzer d3
-alias dCOMixer d4
-alias dHOMixer d5
-# Register
-alias rMICurTemperature r0
-alias rCICurTemperature r1
-alias rHICurTemperature r2
-alias rMOCurTemperature r3
-alias rMOCurPressure r4
-alias rCOMixerRatio r5
-alias rHOMixerRatio r6
-alias rMixerPower r7
-alias rTemp1 r10
-alias rTemp2 r11
-alias rTemp3 r12
-alias rTemp4 r13
-jloop:
-l rMOCurPressure dMOAnalyzer Pressure
-brgt rMOCurPressure vMaxPressure 11
-brlt vMinPressure rMOCurPressure 2
+define cInitTemp 293 #°K
+define cMaxPressure 1000 #kPa
+define cMinPressure 500 #kPa
+##
+alias PAInputMain d0
+alias PAInputCool d1
+alias PAInputHeat d2
+alias PAOutputMain d3
+alias MXCooling d4
+alias MXHeating d5
+alias rTargetTemp r0
+alias rCoolingRatio r1
+alias rHeatingRatio r2
+alias rCurTempPipe1 r3
+alias rCurTempPipe2 r4
+alias rMixerPower r5
+alias rTemp1 r15
+alias rTemp2 r14
+s db Setting cInitTemp
+jMainLoop:
+l rTemp1 PAOutputMain Pressure
+brgt rTemp1 cMaxPressure 11
+brlt cMinPressure rTemp1 2
 move rMixerPower 1
-beqz rMixerPower jloop
-l rMICurTemperature dMIAnalyzer Temperature
-brne rMICurTemperature vTarTemperature 5
-move rHOMixerRatio 100
-move rCOMixerRatio 100
-j jdoit
-bgt rMICurTemperature vTarTemperature jcooling
-blt rMICurTemperature vTarTemperature jheating
+beqz rMixerPower jMainLoop
+l rTargetTemp db Setting
+l rTemp1 PAOutputMain Temperature
+bltal rTemp1 rTargetTemp jHeating
+bgtal rTemp1 rTargetTemp jCooling
+move rCoolingRatio 100
+move rHeatingRatio 100
+jr 2
 move rMixerPower 0
-j jdoit
-j jloop
-jcooling:
-l rCICurTemperature dCIAnalyzer Temperature
-move rTemp1 rMICurTemperature
-move rTemp2 rCICurTemperature
-move rTemp3 0
-move rTemp4 0
-jal jcalcratio
-move rCOMixerRatio rTemp4
-move rHOMixerRatio 100
-j jdoit
-j jloop
-jheating:
-l rHICurTemperature dHIAnalyzer Temperature
-move rTemp1 rMICurTemperature
-move rTemp2 rHICurTemperature
-move rTemp3 0
-move rTemp4 0
-jal jcalcratio
-move rCOMixerRatio 100
-move rHOMixerRatio rTemp4
-j jdoit
-j jloop
-jdoit:
-s dCOMixer Power rMixerPower
-s dHOMixer Power rMixerPower
-s dCOMixer Setting rCOMixerRatio
-s dHOMixer Setting rHOMixerRatio
+j jDoit
 yield
-j jloop
-jcalcratio:
-sub rTemp3 rTemp2 rTemp1
-div rTemp3 100 rTemp3
-mul rTemp4 rTemp2 rTemp1 
-div rTemp4 rTemp4 vTarTemperature
-sub rTemp4 rTemp4 rTemp1
-mul rTemp4 rTemp4 rTemp3
+j jMainLoop
+jHeating:
+l rCurTempPipe1 PAInputMain Temperature
+l rCurTempPipe2 PAInputHeat Temperature
+jal jCalc
+move rCoolingRatio 100
+move rHeatingRatio rTemp2
+jal jDoit
+j jMainLoop
+jCooling:
+l rCurTempPipe1 PAInputMain Temperature
+l rCurTempPipe2 PAInputCool Temperature
+jal jCalc
+move rCoolingRatio rTemp2
+move rHeatingRatio 100
+jal jDoit
+j jMainLoop
+jCalc:
+sub rTemp1 rCurTempPipe2 rCurTempPipe1
+div rTemp1 100 rTemp1
+mul rTemp2 rCurTempPipe2 rCurTempPipe1 
+div rTemp2 rTemp2 rTargetTemp
+sub rTemp2 rTemp2 rCurTempPipe1
+mul rTemp2 rTemp2 rTemp1
 j ra
+jDoit:
+s MXCooling Power rMixerPower
+s MXHeating Power rMixerPower
+s MXCooling Setting rCoolingRatio
+s MXHeating Setting rHeatingRatio
+j jMainLoop
