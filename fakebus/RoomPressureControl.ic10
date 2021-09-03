@@ -19,6 +19,7 @@ alias rTemp2 r14
 alias rTemp3 r13
 alias rTemp4 r12
 ## Init
+s db Setting cBusAddress 
 jal calc
 MainLoop:
 bdns dBusMemory calc
