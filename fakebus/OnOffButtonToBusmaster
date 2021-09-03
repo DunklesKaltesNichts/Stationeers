@@ -1,0 +1,24 @@
+define cCommandBtn0 4099101
+define cCommandBtn1 4099102
+define cCommandBtn2 5099103
+define cCommandBtn3 5099104
+###
+alias dButton0 d0
+alias dButton1 d1
+alias dButton2 d2
+alias dButton3 d3
+alias dBusMemory d5
+init:
+move r0 cCommandBtn0
+move r1 cCommandBtn1
+move r2 cCommandBtn2
+move r3 cCommandBtn3
+move r15 0
+brge r15 3 9
+l r14 dr15 activate
+breqz r14 2
+s d5 Setting rr15
+yield
+add r15 r15 1
+jr -7
+jr -9
