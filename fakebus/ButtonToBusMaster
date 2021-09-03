@@ -1,0 +1,33 @@
+define cToggle 1
+define cCommandOn 5131100
+define cCommandOff 5100100
+alias dButton0 d0
+alias dButton1 d1
+alias dButton2 d2
+alias dLED d4
+alias dBusMaster d5
+move r0 0
+MainLoop:
+yield
+move r1 0
+InnerLoop:
+bge r1 2 MainLoop
+bdns dr1 EndIf
+l r2 dr1 Activate
+beqz r2 EndIf
+brnez r0 7
+s dBusMaster Setting cCommandOn
+brne cToggle 1 4
+move r0 1
+brdns dLED 2
+s dLED On 1
+j EndIf
+s dBusMaster Setting cCommandOff
+brdns dLED 2
+s dLED On 0
+move r0 0
+EndIf:
+add r1 r1 1
+yield
+j InnerLoop
+j MainLoop
