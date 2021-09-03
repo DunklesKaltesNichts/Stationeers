@@ -11,6 +11,7 @@ alias rTemp2 r14
 alias rTemp3 r13
 alias rTemp4 r12
 ## Init
+s db Setting cBusAddress 
 MainLoop:
 l rTemp1 dBusMemory Setting
 blt rTemp1 1000000 MainLoop
