@@ -1,0 +1,118 @@
+## Falco[Ger] ##
+alias OutputGas d0 # Gas Tank
+alias Filter d1 # Gas Filter Waste to Tank
+alias VPOverflow d2 # Gas Tank to Outside
+alias Diode d3 # indicator diode
+alias InputGas d4 # waste pipe analyzer
+alias Alarm d5
+
+# Hashes:
+define FilterHashCO2 1635000764
+define FilterHashN2 632853248
+define FilterHashN2O -1247674305
+define FilterHashO2 -721824748
+define FilterHashX 1915566057
+define FilterHashH2 15011598
+define FilterHashH2O -1993197973
+
+# Set this to determine the filtered gas
+# and when to alert if invalid filter
+define ValidFilterHash -721824748
+
+# !!!!! abs. max pressure small tank: 10000kPa !!!!!
+define OutputMaxPressure 45000 # kPa
+define OutputAlarmPressure 50000 # kPa
+define FilterMin 10 # minimum combined filter %
+define PartPressureLow 1 # kPa, turn filter off
+define PartPressureHigh 10 #kPa, turn filter On
+
+alias tempAlarm r8
+alias inputPressureRatio r9
+alias inputPressure r10
+alias inputGasRatio r11
+alias filterQuantity r12
+alias filterStatus r13 # if the filter is On
+alias outputPressure r14
+#---------------------------------------------------
+start:
+move tempAlarm 0
+s InputGas On 1 # keep pipe analyzer on
+l filterStatus Filter On
+l outputPressure OutputGas Pressure
+l inputPressure InputGas Pressure
+ls r0 Filter 0 Quantity
+ls r1 Filter 1 Quantity
+add filterQuantity r0 r1
+# --------------------------------------------------
+# check if filter is valid
+ls r0 Filter 0 PrefabHash
+bne r0 ValidFilterHash filterAlarm
+ls r0 Filter 1 PrefabHash
+bne r0 ValidFilterHash filterAlarm
+blt filterQuantity FilterMin filterAlarm # filterLow
+# --------------------------------------------------
+beq inputPressure 0 filterOff
+# Get gas quantity.
+# how many kPa is of the actual Gas
+move inputGasRatio -1
+brne ValidFilterHash FilterHashCO2 3
+l inputGasRatio InputGas RatioCarbonDioxide
+j calcPart
+brne ValidFilterHash FilterHashN2 3
+l inputGasRatio InputGas RatioNitrogen
+j calcPart
+brne ValidFilterHash FilterHashN2O 3
+l inputGasRatio InputGas RatioNitrousOxide
+j calcPart
+brne ValidFilterHash FilterHashO2 3
+l inputGasRatio InputGas RatioOxygen
+j calcPart
+brne ValidFilterHash FilterHashX 3
+l inputGasRatio InputGas RatioPollutant
+j calcPart
+brne ValidFilterHash FilterHashH2 3
+l inputGasRatio InputGas RatioVolatiles
+j calcPart
+brne ValidFilterHash FilterHashH2O 3
+l inputGasRatio InputGas RatioWater
+j calcPart
+s db Setting ValidFilterHash
+s db On 0 # error, turn IC off.
+calcPart:
+mul inputPressureRatio inputPressure inputGasRatio
+# --------------------------------------------------
+# filter ok, check if pipe has enough gas
+beq filterStatus 1 filterIsOn
+blt inputPressureRatio PartPressureHigh endFilter
+s Filter On 1 # Pressure &gt; High, turn on
+filterIsOn:
+bgt inputPressureRatio PartPressureLow endFilter
+s Filter On 0 # Pressure &lt; Low, turn off
+j endFilter
+filterAlarm:
+move tempAlarm 1
+filterOff:
+s Filter On 0
+endFilter:
+# --------------------------------------------------
+bdns Diode endDiode
+s Diode On 1
+div r0 filterQuantity 200 # 2 filters, diode 0.0-1.0
+s Diode Setting r0
+endDiode:
+# --------------------------------------------------
+# check tank overpressure
+blt outputPressure OutputMaxPressure stopDump
+s VPOverflow On 1
+j endDump
+stopDump:
+s VPOverflow On 0
+endDump:
+# output alarm
+blt outputPressure OutputAlarmPressure endOutGasAlrm
+move tempAlarm 1
+endOutGasAlrm:
+# --------------------------------------------------
+s Alarm Setting tempAlarm
+yield
+j start
