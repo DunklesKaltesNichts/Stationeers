@@ -1,1 +1,109 @@
-
+alias dGasOutput d0
+alias dGasInput d1
+alias dFilter d2
+alias dVPOverflow d3
+alias dDiode d4
+#-
+define cValidFilterHash 632853248
+#-
+define cFilterHashCO2 1635000764
+define cFilterHashN2 632853248
+define cFilterHashN2O -1247674305
+define cFilterHashO2 -721824748
+define cFilterHashX 1915566057
+define cFilterHashH2 15011598
+define cFilterHashH2O -1993197973
+#- 
+define cOutputMaxPressure 45000 # kPa
+define cOutputMinPressure 1000 # kPA
+define cFilterMin 10 # minimum combined filter %
+define cPartPressureLow 1 # kPa, turn filter off
+define cPartPressureHigh 10 #kPa, turn filter On
+#- 
+alias rTemp1 r15
+alias rTemp2 r14
+alias rAlarm r13
+alias rFilterPower r12
+alias rFilterQuantity r11
+alias rVPStatus r10
+# -
+jInit:
+jMainLoop:
+move rFilterPower 0
+move rAlarm 400
+move rVPStatus 0
+yield
+# Check Filter
+ls rTemp1 dFilter 0 PrefabHash
+bne rTemp1 cValidFilterHash jWrongFilter
+ls rTemp1 dFilter 1 PrefabHash
+bne rTemp1 cValidFilterHash jWrongFilter
+ls rTemp1 dFilter 0 Quantity
+ls rTemp2 dFilter 1 Quantity
+add rFilterQuantity rTemp1 rTemp2
+blt rFilterQuantity cFilterMin jFilterLow
+# Check Overpressure
+l rTemp1 dGasOutput Pressure
+move rVPStatus 0
+bgt rTemp1 cOutputMaxPressure jOverPressure
+blt rTemp1 cOutputMinPressure jLowPressure
+# - 
+# move inputGasRatio -1
+brne cValidFilterHash cFilterHashCO2 3
+l rTemp1 dGasInput RatioCarbonDioxide
+j jCalc
+brne cValidFilterHash cFilterHashN2 3
+l rTemp1 dGasInput RatioNitrogen
+j jCalc
+brne cValidFilterHash cFilterHashN2O 3
+l rTemp1 dGasInput RatioNitrousOxide
+j jCalc
+brne cValidFilterHash cFilterHashO2 3
+l rTemp1 dGasInput RatioOxygen
+j jCalc
+brne cValidFilterHash cFilterHashX 3
+l rTemp1 dGasInput RatioPollutant
+j jCalc
+brne cValidFilterHash cFilterHashH2 3
+l rTemp1 dGasInput RatioVolatiles
+j jCalc
+j jWrongFilter
+jCalc:
+l rTemp2 dGasInput Pressure
+mul rTemp2 rTemp2 rTemp1
+blt rTemp2 cPartPressureLow jFilterOff
+bgt rTemp2 cPartPressureHigh jFilterOn
+j jMainLoop
+jFilterOn:
+move rFilterPower 1
+j jDoit
+jFilterOff:
+move rFilterPower 0
+j jDoit
+jLowPressure:
+move rAlarm 401
+move rVPStatus 0
+j jDoit
+jOverPressure:
+move rAlarm 402
+move rVPStatus 1
+j jDoit
+jFilterLow:
+move rAlarm 411
+move rFilterPower 0
+move rVPStatus 0
+j jDoit
+jWrongFilter:
+move rAlarm 412
+move rFilterPower 0
+move rVPStatus 0
+j jDoit
+jDoit:
+brdns dDiode 4
+s dDiode On 1
+div r0 rFilterQuantity 200 
+s dDiode Setting r0
+s db Setting rAlarm
+s dFilter On rFilterPower
+s dVPOverflow On rVPStatus
+j jMainLoop
