@@ -4,15 +4,15 @@ alias dBusMemory d0
 alias rTemp1 r13
 alias rTemp2 r14
 alias rTemp3 r15
-MainLoop:
+jMainLoop:
 l rTemp1 db Setting
-beqz rTemp1 MainLoop
-blt rTemp1 1000000 MainLoop  >> Diese Zeile noch beim Empfänger rein
-jal send
-j MainLoop
-send:
+beqz rTemp1 jMainLoop
+blt rTemp1 1000000 jMainLoop  >> Diese Zeile noch beim Empfänger rein
+jal jSend
+j jMainLoop
+jSend:
 l rTemp2 dBusMemory Setting
-bnez rTemp2 sendwait
+bnez rTemp2 jSendWait
 s dBusMemory Setting rTemp1
 sleep 1
 s dBusMemory Setting 0
