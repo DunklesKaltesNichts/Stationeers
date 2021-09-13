@@ -1,0 +1,48 @@
+alias dDoor1 d0
+alias dDoor2 d1
+alias dDoor3 d2
+alias dDoor4 d3
+alias dMotionMemory d5
+define cDoorWaitTime 10 # s
+define cLightWaitTime 60 # s
+define cHashMotionSensor -1713470563
+define cHashLightRoudAngled 1592905386
+define cHashLightRound 1514476632
+alias rMotionDetected r9
+alias rDoor1Open r10
+alias rDoor2Open r11
+alias rDoor3Open r12
+alias rDoor4Open r13
+alias rTemp1 r15
+alias rTemp2 r14
+alias rTemp3 r6
+jMainLoop:
+sleep 1
+move rTemp1 0
+lb rTemp1 cHashMotionSensor Activate 3 
+breqz rTemp1 3
+move rMotionDetected cLightWaitTime
+jr 3
+breqz rMotionDetected 2
+sub rMotionDetected rMotionDetected 1
+sgtz rTemp1 rMotionDetected
+s dMotionMemory Setting rTemp1
+sb cHashLightRoudAngled On rTemp1
+sb cHashLightRound On rTemp1
+move rTemp1 0
+jInnerLoop:
+brdns dr15 11
+l rTemp3 dr15 Open
+add rTemp2 rTemp1 10
+breqz rTemp3 4
+brgtz rr14 3
+move rr14 cDoorWaitTime
+jr 3
+breqz rr14 4
+sub rr14 rr14 1
+sgtz rTemp3 rr14
+s dr15 Open rTemp3
+add rTemp1 rTemp1 1
+brgt rTemp1 3 2
+j jInnerLoop
+j jMainLoop
