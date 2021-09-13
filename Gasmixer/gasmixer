@@ -1,6 +1,6 @@
 ## Gas Mixer 
-alias PipeAnalyzerP1 d0
-alias PipeAnalyzerP2 d1
+alias PipeAnalyzerP1 d0 # Straigh
+alias PipeAnalyzerP2 d1 # Side
 alias PipeAnalyzerO1 d2
 alias Mixer d3
 ##
