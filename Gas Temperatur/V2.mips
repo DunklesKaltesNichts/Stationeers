@@ -1,79 +1,47 @@
-define cTemp_Init 293 # K
-define cTemp_Diff_Max 5 # %
-define cPres_Targ 5000 # kPa
-define cPres_Diff_Max 5 # %
+define cTemp_Init 300
+define cPres_Target_Max 5000
+define cPres_Target_Min 2500
 ##
-alias dPA_Input_Main d0
-alias dPA_Input_Cool d1
-alias dPA_Input_Heat d2
-alias dPA_Output_Main d3
-alias dGM_Cooling d4
-alias dGM_Heating d5
-alias rTemp_Targ r0
-alias rRatio_Cooling r1
-alias rRatio_Heating r2
-alias rTemp_Cur_Straigh r3
-alias rTemp_Cur_Side r4
-alias rGM_Power_Cool r5
-alias rGM_Power_Heat r6
-alias rPres_Cur r7
-alias rTemp_Cur_Output r8
-alias rTemp_Cur_Input r9
+alias dPA_Output d0
+alias dPA_Cooling d1
+alias dPA_Heating d2
+alias dVP_Cooling d3
+alias dVP_Heating d4
+alias rPres_Cur_Output r0
+alias rTemp_Cur_Cooling r1
+alias rTemp_Cur_Heating r2
+alias rPres_Cur_Cooling r3
+alias rPres_Cur_Heating r4
+alias rTemp_Targ_Output r5
+alias rOn_VP r6
+alias rSet_VP_Heating r7
+alias rSet_VP_Cooling r8
 alias rTemp1 r15
 alias rTemp2 r14
+jInit:
 s db Setting cTemp_Init
 jMainLoop:
 yield
-l rPres_Cur dPA_Output_Main Pressure
-div rTemp1 cPres_Diff_Max 100
-sna rTemp1 rPres_Cur cPres_Targ rTemp1
-brnez rTemp1 4
-move rGM_Power_Cool rTemp1
-move rGM_Power_Heat rTemp1
-j jDoit
-l rTemp_Cur_Input dPA_Input_Main Temperature
-l rTemp_Targ db Setting
-div rTemp1 cTemp_Diff_Max 100
-sna rTemp1 rTemp_Cur_Output rTemp_Targ rTemp1
-brnez rTemp1 4
-move rRatio_Cooling 100
-move rRatio_Heating 100
-j jDoit
-j jMainLoop
-bltal rTemp_Cur_Output rTemp_Targ jHeating
-bgtal rTemp_Cur_Output rTemp_Targ jCooling
+l rTemp_Targ_Output db Setting
+l rPres_Cur_Output dPA_Output Pressure
+brnez rOn_VP 3
+slt rOn_VP rPres_Cur_Output cPres_Target_Min
 jr 2
-
-j jDoit
-yield
-j jMainLoop
-jHeating:
-l rCurTempPipe1 PAInputMain Temperature
-l rCurTempPipe2 PAInputHeat Temperature
-jal jCalc
-move rCoolingRatio 100
-move rHeatingRatio rTemp2
-jal jDoit
-j jMainLoop
-jCooling:
-l rCurTempPipe1 PAInputMain Temperature
-l rCurTempPipe2 PAInputCool Temperature
-jal jCalc
-move rCoolingRatio rTemp2
-move rHeatingRatio 100
-jal jDoit
-j jMainLoop
-jCalc:
-sub rTemp1 rCurTempPipe2 rCurTempPipe1
+slt rOn_VP rPres_Cur_Output cPres_Target_Max
+beqz rOn_VP jMainLoop
+l rTemp_Cur_Cooling dPA_Cooling Temperature
+l rTemp_Cur_Heating dPA_Heating Temperature
+##
+sub rTemp1 rTemp_Cur_Cooling rTemp_Cur_Heating
 div rTemp1 100 rTemp1
-mul rTemp2 rCurTempPipe2 rCurTempPipe1 
-div rTemp2 rTemp2 rTargetTemp
-sub rTemp2 rTemp2 rCurTempPipe1
-mul rTemp2 rTemp2 rTemp1
-j ra
-jDoit:
-s MXCooling Power rMixerPower
-s MXHeating Power rMixerPower
-s MXCooling Setting rCoolingRatio
-s MXHeating Setting rHeatingRatio
+mul rTemp2 rTemp_Cur_Cooling rTemp_Cur_Heating 
+div rTemp2 rTemp2 rTemp_Targ_Output
+sub rTemp2 rTemp2 rTemp_Cur_Heating
+mul rSet_VP_Heating rTemp2 rTemp1
+sub rSet_VP_Cooling 100 rSet_VP_Heating
+s dVP_Cooling Setting rSet_VP_Cooling
+s dVP_Heating Setting rSet_VP_Heating
+s dVP_Cooling On rOn_VP
+s dVP_Heating On rOn_VP
+
 j jMainLoop
