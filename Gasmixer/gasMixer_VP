@@ -40,9 +40,9 @@ l rRatio_Cur_O2 dPA_Output RatioOxygen
 mul rRatio_Cur_O2 rRatio_Cur_O2 100
 l rRatio_Cur_CO2 dPA_Output RatioCarbonDioxide
 mul rRatio_Cur_CO2 rRatio_Cur_CO2 100
-l rRatio_Cur_N dPA_Output RatioNitrogen 
+l rRatio_Cur_N dPA_Output RatioNitrogen
 mul rRatio_Cur_N rRatio_Cur_N 100
-div rPres_Diff cPres_Targ rPres_Cur 
+div rPres_Diff cPres_Targ rPres_Cur
 ## Oxygen
 div rTemp3 cRatio_Diff_Max 100
 sna rTemp1 rRatio_Cur_O2 cRatio_Targ_O2 rTemp3
@@ -58,7 +58,7 @@ move rTemp1 rRatio_Cur_CO2
 move rTemp2 cRatio_Targ_CO2
 jal jCalcPumpValRatio
 move rVP_Set_CO2 rVP_Calc_Return
-# Nitrogen 
+# Nitrogen
 sna rTemp1 rRatio_Cur_N cRatio_Targ_N rTemp3
 breqz rTemp1 5
 move rTemp1 rRatio_Cur_N
@@ -69,12 +69,12 @@ s dVP_O2 Setting rVP_Set_O2
 s dVP_CO2 Setting rVP_Set_CO2
 s dVP_N Setting rVP_Set_N
 j jMainLoop
-## 
+##
 jCalcPumpValRatio:
 sub rTemp1 rTemp2 rTemp1
 mul rTemp1 rTemp1 rPres_Diff
-min rVP_Calc_Return rTemp1 cFlow_VP_Max
-max rVP_Calc_Return rVP_Calc_Return cFlow_VP_Min
+min rVP_Calc_Return rTemp1 100
+max rVP_Calc_Return rVP_Calc_Return 0
 #abs rTemp1 rTemp1
 j ra
 j jMainLoop
