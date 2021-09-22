@@ -3,8 +3,8 @@ alias dDoor2 d1
 alias dDoor3 d2
 alias dDoor4 d3
 alias dMotionMemory d5
-define cDoorWaitTime 10 # s
-define cLightWaitTime 60 # s
+define cDoorWaitTime 10 # yields (0.5s)
+define cLightWaitTime 60 # yields (0.5s)
 define cHashTriggerPlateLarge -2008706143
 define cHashTriggerPlateMedium 1269458680
 define cHashTriggerPlateSmall -1536471028
@@ -24,12 +24,14 @@ alias rTemp1 r15
 alias rTemp2 r14
 alias rTemp3 r6
 jMainLoop:
-sleep 1
+yield
 move rTemp1 0
 lb rTemp1 cHashTriggerPlateSmall Setting 3
-breqz rTemp1 7
+breqz rTemp1 8
+move rMotionDetected cLightWaitTime
 lb rTemp1 cHashTriggerPlateMedium Setting 3
 breqz rTemp1 5
+move rMotionDetected cLightWaitTime
 lb rTemp1 cHashTriggerPlateLarge Setting 3
 breqz rTemp1 3
 move rMotionDetected cLightWaitTime
