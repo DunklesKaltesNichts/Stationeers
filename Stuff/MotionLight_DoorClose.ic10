@@ -5,9 +5,16 @@ alias dDoor4 d3
 alias dMotionMemory d5
 define cDoorWaitTime 10 # s
 define cLightWaitTime 60 # s
-define cHashMotionSensor -1713470563
+define cHashTriggerPlateLarge -2008706143
+define cHashTriggerPlateMedium 1269458680
+define cHashTriggerPlateSmall -1536471028
 define cHashLightRoudAngled 1592905386
 define cHashLightRound 1514476632
+define cHashLightLong 797794350
+define cHashLightLongAngled 1847265835
+define cHashLightLongWide 555215790
+define cHashConsoleMonitor 801677497
+define cHashConsole 235638270
 alias rMotionDetected r9
 alias rDoor1Open r10
 alias rDoor2Open r11
@@ -19,7 +26,11 @@ alias rTemp3 r6
 jMainLoop:
 sleep 1
 move rTemp1 0
-lb rTemp1 cHashMotionSensor Activate 3 
+lb rTemp1 cHashTriggerPlateSmall Setting 3
+breqz rTemp1 7
+lb rTemp1 cHashTriggerPlateMedium Setting 3
+breqz rTemp1 5
+lb rTemp1 cHashTriggerPlateLarge Setting 3
 breqz rTemp1 3
 move rMotionDetected cLightWaitTime
 jr 3
@@ -29,6 +40,11 @@ sgtz rTemp1 rMotionDetected
 s dMotionMemory Setting rTemp1
 sb cHashLightRoudAngled On rTemp1
 sb cHashLightRound On rTemp1
+sb cHashLightLong On rTemp1
+sb cHashLightLongAngled On rTemp1
+sb cHashLightLongWide On rTemp1
+sb cHashConsoleMonitor On rTemp1
+sb cHashConsole On rTemp1
 move rTemp1 0
 jInnerLoop:
 brdns dr15 11
