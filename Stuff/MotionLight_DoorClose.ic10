@@ -27,10 +27,10 @@ jMainLoop:
 yield
 move rTemp1 0
 lb rTemp1 cHashTriggerPlateSmall Setting 3
-breqz rTemp1 9
+breqz rTemp1 2
 move rMotionDetected cLightWaitTime
 lb rTemp1 cHashTriggerPlateMedium Setting 3
-breqz rTemp1 6
+breqz rTemp1 2
 move rMotionDetected cLightWaitTime
 lb rTemp1 cHashTriggerPlateLarge Setting 3
 breqz rTemp1 3
