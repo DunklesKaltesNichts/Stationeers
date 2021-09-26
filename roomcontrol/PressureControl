@@ -1,5 +1,5 @@
 define cPressure 100 # kPa default
-define cFlow 10 # kPa default
+define cFlow 4 # kPa default
 # Mode 0 Off, 1 Auto, 2 Pressurize
 # Only with Dial
 define cMode 0
