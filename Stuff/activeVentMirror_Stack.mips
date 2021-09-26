@@ -23,7 +23,8 @@ breq rTemp1 rr16 7
 move rr16 rTemp2
 move rTemp1 1
 jDevLoop:
-s dr4 r3 rr16
+brdns dr15 2
+s dr15 r3 rr16
 add rTemp1 rTemp1 1
 blt rTemp1 6 jDevLoop
 bgtz sp jTypeLoop
