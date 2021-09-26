@@ -20,7 +20,7 @@ jTypeLoop:
 pop r3
 l rTemp1 dMasterVent r3
 breq rTemp1 rr16 7
-move rr16 rTemp2
+move rr16 rTemp1
 move rTemp1 1
 jDevLoop:
 brdns dr15 2
