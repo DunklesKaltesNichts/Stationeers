@@ -27,10 +27,8 @@ l rTemp1 dBusMemory Setting
 blt rTemp1 1000000 MainLoop
 div rTemp2 rTemp1 100000
 trunc rTemp2 rTemp2
-seq rTemp3 rTemp2 99 #Broadcast
 seq rTemp4 rTemp2 cBusAddress
-nor rTemp4 rTemp4 rTemp3
-bnez rTemp4 MainLoop
+beqz rTemp4 MainLoop
 mul rTemp2 rTemp2 100000
 sub rTemp1 rTemp1 rTemp2
 div rTemp2 rTemp1 1000
