@@ -12,6 +12,12 @@ alias rOldOn r5
 alias rTemp1 r15
 jMainLoop:
 sleep 1
+## On Status
+l rTemp1 dMasterVent On
+breq rTemp1 rOldOn 3
+move rOldOn rTemp1 
+jal jDoitOnSet
+beqz rOldOn jMainLoop
 ## Mode Mirror
 l rTemp1 dMasterVent Mode
 breq rTemp1 rOldMode 3
@@ -25,10 +31,6 @@ l rTemp1 dMasterVent PressureInternal
 breq rTemp1 rOldPressureInternal 3
 move rOldPressureInternal rTemp1 
 jal jDoitPISet
-l rTemp1 dMasterVent On
-breq rTemp1 rOldOn 3
-move rOldOn rTemp1 
-jal jDoitOnSet
 j jMainLoop
 jDoitModeSet:
 move rCounter 1
