@@ -1,0 +1,72 @@
+alias dMasterVent d0
+alias dSlaveVent1 d1
+alias dSlaveVent2 d2
+alias dSlaveVent3 d3
+alias dSlaveVent4 d4
+alias dSlaveVent5 d5
+alias rCounter r0
+alias rSelect r1
+alias rOldMode r2
+alias rOldPressureExternal r3
+alias rOldPressureInternal r4
+alias rOldOn r5
+alias rTemp1 r15
+jMainLoop:
+yield
+## Mode Mirror
+l rTemp1 dMasterVent Mode
+breq rTemp1 rOldMode 12
+move rOldMode rTemp1 
+brdns dSlaveVent1 2
+s dSlaveVent1 Mode rTemp1
+brdns dSlaveVent2 2
+s dSlaveVent2 Mode rTemp1
+brdns dSlaveVent3 2
+s dSlaveVent3 Mode rTemp1
+brdns dSlaveVent4 2
+s dSlaveVent4 Mode rTemp1
+brdns dSlaveVent5 2
+s dSlaveVent5 Mode rTemp1
+## Pressure External Mirror
+l rTemp1 dMasterVent PressureExternal
+breq rTemp1 rOldPressureExternal 12
+move rOldPressureExternal rTemp1 
+brdns dSlaveVent1 2
+s dSlaveVent1 PressureExternal rTemp1
+brdns dSlaveVent2 2
+s dSlaveVent2 PressureExternal rTemp1
+brdns dSlaveVent3 2
+s dSlaveVent3 PressureExternal rTemp1
+brdns dSlaveVent4 2
+s dSlaveVent4 PressureExternal rTemp1
+brdns dSlaveVent5 2
+s dSlaveVent5 PressureExternal rTemp1
+## Pressure Internal Mirror
+l rTemp1 dMasterVent PressureInternal
+breq rTemp1 rOldPressureInternal 12
+move rOldPressureInternal rTemp1 
+brdns dSlaveVent1 2
+s dSlaveVent1 PressureInternal rTemp1
+brdns dSlaveVent2 2
+s dSlaveVent2 PressureInternal rTemp1
+brdns dSlaveVent3 2
+s dSlaveVent3 PressureInternal rTemp1
+brdns dSlaveVent4 2
+s dSlaveVent4 PressureInternal rTemp1
+brdns dSlaveVent5 2
+s dSlaveVent5 PressureInternal rTemp1
+## On Status Mode
+l rTemp1 dMasterVent On
+breq rTemp1 rOldOn 12
+move rOldOn rTemp1 
+brdns dSlaveVent1 2
+s dSlaveVent1 On rTemp1
+brdns dSlaveVent2 2
+s dSlaveVent2 On rTemp1
+brdns dSlaveVent3 2
+s dSlaveVent3 On rTemp1
+brdns dSlaveVent4 2
+s dSlaveVent4 On rTemp1
+brdns dSlaveVent5 2
+s dSlaveVent5 On rTemp1
+j jMainLoop
