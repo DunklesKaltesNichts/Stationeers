@@ -10,9 +10,9 @@ alias rOldOn r2
 alias rLogicType r3
 alias rTemp1 r15
 ## Init
-push 7
-push 3
-push 28
+push LogicType.PressureExternal
+push LogicType.Mode
+push LogicType.On
 jMainLoop:
 sleep 1
 move sp 3
