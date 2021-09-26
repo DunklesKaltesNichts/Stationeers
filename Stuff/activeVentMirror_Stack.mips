@@ -8,27 +8,23 @@ alias rOldPressureExternal r0
 alias rOldMode r1
 alias rOldOn r2
 alias rLogicType r3
-alias rCounter r4
 alias rTemp1 r15
-alias rTemp2 r14
-sleep 1
+## Init
 push 7
 push 3
 push 28
-## On Status
 jMainLoop:
 sleep 1
 move sp 3
 jTypeLoop:
 pop r3
-move r15 sp
-l rTemp2 dMasterVent r3
-breq rTemp2 rr15 7
-move rr15 rTemp2
-move rCounter 1
+l rTemp1 dMasterVent r3
+breq rTemp1 rr16 7
+move rr16 rTemp2
+move rTemp1 1
 jDevLoop:
-s dr4 r3 rr15
-add r4 r4 1
-brlt r4 6 -3
+s dr4 r3 rr16
+add rTemp1 rTemp1 1
+blt rTemp1 6 jDevLoop
 bgtz sp jTypeLoop
 j jMainLoop
