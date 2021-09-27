@@ -1,0 +1,30 @@
+define dCloseWaitTime 10 
+###
+alias dDoor1 d0
+alias dDoor2 d1
+##
+alias rDoor1Open r0
+alias rDoor2Open r1
+alias rRunning r14
+alias rTemp1 r15
+move rRunning 1
+jReset: 
+breqz rRunning 6
+s dDoor1 Lock 0
+s dDoor2 Lock 0
+s dDoor1 Open 0
+s dDoor2 Open 0
+move rRunning 0
+jMainLoop:
+yield
+l rDoor1Open dDoor1 Open
+l rDoor2Open dDoor2 Open
+or rTemp1 rDoor1Open rDoor2Open
+beqz rTemp1 jReset
+brgtz rRunning 4
+move rRunning dCloseWaitTime
+s dDoor1 Lock rDoor2Open
+s dDoor2 Lock rDoor1Open
+sub rRunning rRunning 1
+bgt rRunning 1 jMainLoop
+j jReset
