@@ -1,75 +1,83 @@
-define vMaxPressure 1000 #kPA
-define vMaxFlow 100 # Liters
-define vMinFlow 5 # Liters
-# Dont Edit below this Line
-# Devices
-# String 1
-alias dI1Analyzer d0
-alias dO1Pump d3
-# String 2
-alias dI2Analyzer d1
-alias dO2Pump d4
-# String 3
-alias dI3Analyzer d2
-alias dO3Pump d5
-# Register
-alias rI1CurrentPressure r0
-alias rO1TargetFlow r1
-alias rO1TargetPower r2
-alias rI2CurrentPressure r3
-alias rO2TargetFlow r4
-alias rO2TargetPower r5
-alias rI3CurrentPressure r6
-alias rO3TargetFlow r7
-alias rO3TargetPower r8
-alias rTemp1 r10
-alias rTemp2 r11
-alias rTemp3 r12
-loop:
-l rI1CurrentPressure dI1Analyzer Pressure 
-brge rI1CurrentPressure vMaxPressure 8
-move rTemp1 rI1CurrentPressure 
-move rTemp2 0
-move rTemp3 0
-jal calcflow
-move rO1TargetFlow rTemp2
-move rO1TargetPower rTemp3
+define cPres_Targ_Max 5000 # kPA
+define cPres_Targ_Min 2500 # kPA
+define cRatio_Targ_O2 22
+define cRatio_Targ_CO2 10
+define cRatio_Targ_N 68
+define cRatio_Diff_Max 1 # %
+define cVP_Flow_Max 100
+define cVP_Flow_Min 0
+##
+alias dVP_O2 d0
+alias dVP_CO2 d1
+alias dVP_N d2
+alias dPA_Output d3
+##
+alias rPres_Cur r0
+alias rRatio_Cur_O2 r1
+alias rRatio_Cur_CO2 r2
+alias rRatio_Cur_N r3
+alias rVP_Set_O2 r4
+alias rVP_Set_CO2 r5
+alias rVP_Set_N r6
+alias rPres_Diff r7
+alias rVP_On r8
+alias rTemp1 r15
+alias rTemp2 r14
+alias rTemp3 r13
+alias rVP_Calc_Return r12
+jInit:
+
+jMainLoop:
+yield
+l rPres_Cur dPA_Output Pressure
+brgtz rVP_On 3
+slt rVP_On rPres_Cur cPres_Targ_Min
 jr 2
-move rO1TargetPower 0
-l rI2CurrentPressure dI2Analyzer Pressure
-brge rI2CurrentPressure vMaxPressure 8
-move rTemp1 rI2CurrentPressure 
-move rTemp2 0
-move rTemp3 0
-jal calcflow
-move rO2TargetFlow rTemp2
-move rO2TargetPower rTemp3
-jr 2
-move rO2TargetPower 0
-l rI3CurrentPressure dI3Analyzer Pressure
-brge rI3CurrentPressure vMaxPressure 8
-move rTemp1 rI3CurrentPressure 
-move rTemp2 0
-move rTemp3 0
-jal calcflow
-move rO3TargetFlow rTemp2
-move rO3TargetPower rTemp3
-jr 2
-move rO3TargetPower 0
-jal doit
-j loop
-calcflow:
-div rTemp1 rTemp1 vMaxPressure
-sub rTemp1 1 rTemp1
-mul rTemp2 rTemp1 vMaxFlow
-brlt rTemp2 vMinFlow 2
-move rTemp3 1
+slt rVP_On rPres_Cur cPres_Targ_Max
+s dVP_O2 On rVP_On
+s dVP_CO2 On rVP_On
+s dVP_N On rVP_On
+## Read current Ratios
+l rRatio_Cur_O2 dPA_Output RatioOxygen
+mul rRatio_Cur_O2 rRatio_Cur_O2 100
+l rRatio_Cur_CO2 dPA_Output RatioCarbonDioxide
+mul rRatio_Cur_CO2 rRatio_Cur_CO2 100
+l rRatio_Cur_N dPA_Output RatioNitrogen
+mul rRatio_Cur_N rRatio_Cur_N 100
+sub rTemp1 cPres_Targ_Max rPres_Cur
+div rPres_Diff rTemp1 cPres_Targ_Max
+## Oxygen
+div rTemp3 cRatio_Diff_Max 100
+sna rTemp1 rRatio_Cur_O2 cRatio_Targ_O2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_O2
+move rTemp2 cRatio_Targ_O2
+jal jCalcPumpValRatio
+move rVP_Set_O2 rVP_Calc_Return
+# Carbon Dioxide
+sna rTemp1 rRatio_Cur_CO2 cRatio_Targ_CO2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_CO2
+move rTemp2 cRatio_Targ_CO2
+jal jCalcPumpValRatio
+move rVP_Set_CO2 rVP_Calc_Return
+# Nitrogen
+sna rTemp1 rRatio_Cur_N cRatio_Targ_N rTemp3
+breqz rTemp1 5
+move rTemp1 rRatio_Cur_N
+move rTemp2 cRatio_Targ_N
+jal jCalcPumpValRatio
+move rVP_Set_N rVP_Calc_Return
+s dVP_O2 Setting rVP_Set_O2
+s dVP_CO2 Setting rVP_Set_CO2
+s dVP_N Setting rVP_Set_N
+j jMainLoop
+##
+jCalcPumpValRatio:
+sub rTemp1 rTemp2 rTemp1
+mul rTemp1 rTemp1 rPres_Diff
+min rVP_Calc_Return rTemp1 100
+max rVP_Calc_Return rVP_Calc_Return 0
+#abs rTemp1 rTemp1
 j ra
-doit:
-s dO1Pump Setting rO1TargetFlow
-s dO1Pump Power rO1TargetPower
-s dO2Pump Setting rO2TargetFlow
-s dO2Pump Power rO2TargetPower
-s dO3Pump Setting rO3TargetFlow
-s dO3Pump Power rO3TargetPower
-j ra
+j jMainLoop
