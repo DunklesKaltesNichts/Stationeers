@@ -1,5 +1,5 @@
-define cPres_Targ 5000 # kPA
-define cPres_Diff_Max 5 # %
+define cPres_Targ_Max 5000 # kPA
+define cPres_Targ_Min 2500 # kPA
 define cRatio_Targ_O2 22
 define cRatio_Targ_CO2 10
 define cRatio_Targ_N 68
@@ -20,6 +20,7 @@ alias rVP_Set_O2 r4
 alias rVP_Set_CO2 r5
 alias rVP_Set_N r6
 alias rPres_Diff r7
+alias rVP_On r8
 alias rTemp1 r15
 alias rTemp2 r14
 alias rTemp3 r13
@@ -29,12 +30,13 @@ jInit:
 jMainLoop:
 yield
 l rPres_Cur dPA_Output Pressure
-div rTemp1 cPres_Diff_Max 100
-sna rTemp1 rPres_Cur cPres_Targ rTemp1
-s dVP_O2 On rTemp1
-s dVP_CO2 On rTemp1
-s dVP_N On rTemp1
-beqz rTemp1 jMainLoop
+brgtz rVP_On 3
+slt rVP_On rPres_Cur cPres_Targ_Min
+jr 2
+slt rVP_On rPres_Cur cPres_Targ_Max
+s dVP_O2 On rVP_On
+s dVP_CO2 On rVP_On
+s dVP_N On rVP_On
 ## Read current Ratios
 l rRatio_Cur_O2 dPA_Output RatioOxygen
 mul rRatio_Cur_O2 rRatio_Cur_O2 100
@@ -42,7 +44,8 @@ l rRatio_Cur_CO2 dPA_Output RatioCarbonDioxide
 mul rRatio_Cur_CO2 rRatio_Cur_CO2 100
 l rRatio_Cur_N dPA_Output RatioNitrogen
 mul rRatio_Cur_N rRatio_Cur_N 100
-div rPres_Diff cPres_Targ rPres_Cur
+sub rTemp1 cPres_Targ_Max rPres_Cur
+div rPres_Diff rTemp1 cPres_Targ_Max
 ## Oxygen
 div rTemp3 cRatio_Diff_Max 100
 sna rTemp1 rRatio_Cur_O2 cRatio_Targ_O2 rTemp3
