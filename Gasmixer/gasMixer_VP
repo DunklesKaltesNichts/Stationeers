@@ -1,73 +1,83 @@
-define cTemp_Init 293 #K
-define cPress_Output_Max 5000 #kPa
-define cPress_Output_Min 3000 #kPa
-define cPress_Input_Min 300 #kPa
+define cPres_Targ_Max 5000 # kPA
+define cPres_Targ_Min 2500 # kPA
+define cRatio_Targ_O2 22
+define cRatio_Targ_CO2 10
+define cRatio_Targ_N 68
+define cRatio_Diff_Max 1 # %
+define cVP_Flow_Max 100
+define cVP_Flow_Min 0
 ##
-alias dPA_Coolpipe d0
-alias dPA_Heatpipe d1
-alias dPA_Main_Output d2
-alias dVP_Coolpipe d3
-alias dVP_Heatpipe d4
-alias dLM_Error d5
-alias rTemp_Targ r0
-alias rTemp_Coolpipe_Cur r3
-alias rTemp_Heatpipe_Cur r4
-alias rOn_VP r5
-alias rError r6
-alias rPres_Cur r7
-alias rVP_Set_Cool r8
-alias rVP_Set_Heat r9
+alias dVP_O2 d0
+alias dVP_CO2 d1
+alias dVP_N d2
+alias dPA_Output d3
+##
+alias rPres_Cur r0
+alias rRatio_Cur_O2 r1
+alias rRatio_Cur_CO2 r2
+alias rRatio_Cur_N r3
+alias rVP_Set_O2 r4
+alias rVP_Set_CO2 r5
+alias rVP_Set_N r6
+alias rPres_Diff r7
+alias rVP_On r8
 alias rTemp1 r15
 alias rTemp2 r14
+alias rTemp3 r13
+alias rVP_Calc_Return r12
 jInit:
-s db Setting cTemp_Init
+
 jMainLoop:
 yield
-move rError 400
-l rTemp1 dPA_Coolpipe Pressure
-blt rTemp1 cPress_Input_Min jLowInputPressure
-l rTemp1 dPA_Heatpipe Pressure
-blt rTemp1 cPress_Input_Min jLowInputPressure
-l rPres_Cur dPA_Main_Output Pressure
-brgtz rOn_VP 5
-slt rOn_VP rPres_Cur cPress_Output_Min
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-j jCalc
-slt rOn_VP rPres_Cur cPress_Output_Max
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-jCalc:
-l rTemp_Targ db Setting
-l rTemp_Coolpipe_Cur dPA_Coolpipe Temperature
-l rTemp_Heatpipe_Cur dPA_Heatpipe Temperature
-sub rTemp1 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur
-div rTemp1 100 rTemp1
-mul rTemp2 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur 
-div rTemp2 rTemp2 rTemp_Targ
-sub rTemp2 rTemp2 rTemp_Heatpipe_Cur
-mul rTemp2 rTemp2 rTemp1
-move rVP_Set_Heat rTemp2
-sub rVP_Set_Cool 100 rVP_Set_Heat
-sub rTemp1 cPress_Output_Max rPres_Cur
-div rTemp1 rTemp1 cPress_Output_Max
-mul rVP_Set_Heat rVP_Set_Heat rTemp1
-mul rVP_Set_Cool rVP_Set_Cool rTemp1
-max rVP_Set_Heat rVP_Set_Heat 0
-max rVP_Set_Cool rVP_Set_Cool 0
-min rVP_Set_Heat rVP_Set_Heat 100
-min rVP_Set_Cool rVP_Set_Cool 100
-jSet:
-brdns dLM_Error 2
-s dLM_Error Setting rError
-s dVP_Coolpipe Setting rVP_Set_Cool
-s dVP_Heatpipe Setting rVP_Set_Heat
+l rPres_Cur dPA_Output Pressure
+brgtz rVP_On 3
+slt rVP_On rPres_Cur cPres_Targ_Min
+jr 2
+slt rVP_On rPres_Cur cPres_Targ_Max
+s dVP_O2 On rVP_On
+s dVP_CO2 On rVP_On
+s dVP_N On rVP_On
+## Read current Ratios
+l rRatio_Cur_O2 dPA_Output RatioOxygen
+mul rRatio_Cur_O2 rRatio_Cur_O2 100
+l rRatio_Cur_CO2 dPA_Output RatioCarbonDioxide
+mul rRatio_Cur_CO2 rRatio_Cur_CO2 100
+l rRatio_Cur_N dPA_Output RatioNitrogen
+mul rRatio_Cur_N rRatio_Cur_N 100
+sub rTemp1 cPres_Targ_Max rPres_Cur
+div rPres_Diff rTemp1 cPres_Targ_Max
+## Oxygen
+div rTemp3 cRatio_Diff_Max 100
+sna rTemp1 rRatio_Cur_O2 cRatio_Targ_O2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_O2
+move rTemp2 cRatio_Targ_O2
+jal jCalcPumpValRatio
+move rVP_Set_O2 rVP_Calc_Return
+# Carbon Dioxide
+sna rTemp1 rRatio_Cur_CO2 cRatio_Targ_CO2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_CO2
+move rTemp2 cRatio_Targ_CO2
+jal jCalcPumpValRatio
+move rVP_Set_CO2 rVP_Calc_Return
+# Nitrogen
+sna rTemp1 rRatio_Cur_N cRatio_Targ_N rTemp3
+breqz rTemp1 5
+move rTemp1 rRatio_Cur_N
+move rTemp2 cRatio_Targ_N
+jal jCalcPumpValRatio
+move rVP_Set_N rVP_Calc_Return
+s dVP_O2 Setting rVP_Set_O2
+s dVP_CO2 Setting rVP_Set_CO2
+s dVP_N Setting rVP_Set_N
 j jMainLoop
-jLowInputPressure:
-move rOn_VP 0
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-move rError 404
-brdns dLM_Error 2
-s dLM_Error Setting rError
+##
+jCalcPumpValRatio:
+sub rTemp1 rTemp2 rTemp1
+mul rTemp1 rTemp1 rPres_Diff
+min rVP_Calc_Return rTemp1 100
+max rVP_Calc_Return rVP_Calc_Return 0
+#abs rTemp1 rTemp1
+j ra
 j jMainLoop
