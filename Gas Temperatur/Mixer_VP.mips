@@ -1,0 +1,73 @@
+define cTemp_Init 293 #K
+define cPress_Output_Max 5000 #kPa
+define cPress_Output_Min 3000 #kPa
+define cPress_Input_Min 300 #kPa
+##
+alias dPA_Coolpipe d0
+alias dPA_Heatpipe d1
+alias dPA_Main_Output d2
+alias dVP_Coolpipe d3
+alias dVP_Heatpipe d4
+alias dLM_Error d5
+alias rTemp_Targ r0
+alias rTemp_Coolpipe_Cur r3
+alias rTemp_Heatpipe_Cur r4
+alias rOn_VP r5
+alias rError r6
+alias rPres_Cur r7
+alias rVP_Set_Cool r8
+alias rVP_Set_Heat r9
+alias rTemp1 r15
+alias rTemp2 r14
+jInit:
+s db Setting cTemp_Init
+jMainLoop:
+yield
+move rError 400
+l rTemp1 dPA_Coolpipe Pressure
+blt rTemp1 cPress_Input_Min jLowInputPressure
+l rTemp1 dPA_Heatpipe Pressure
+blt rTemp1 cPress_Input_Min jLowInputPressure
+l rPres_Cur dPA_Main_Output Pressure
+brgtz rOn_VP 5
+slt rOn_VP rPres_Cur cPress_Output_Min
+s dVP_Coolpipe On rOn_VP
+s dVP_Heatpipe On rOn_VP
+j jCalc
+slt rOn_VP rPres_Cur cPress_Output_Max
+s dVP_Coolpipe On rOn_VP
+s dVP_Heatpipe On rOn_VP
+jCalc:
+l rTemp_Targ db Setting
+l rTemp_Coolpipe_Cur dPA_Coolpipe Temperature
+l rTemp_Heatpipe_Cur dPA_Heatpipe Temperature
+sub rTemp1 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur
+div rTemp1 100 rTemp1
+mul rTemp2 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur 
+div rTemp2 rTemp2 rTemp_Targ
+sub rTemp2 rTemp2 rTemp_Heatpipe_Cur
+mul rTemp2 rTemp2 rTemp1
+move rVP_Set_Heat rTemp2
+sub rVP_Set_Cool 100 rVP_Set_Heat
+sub rTemp1 cPress_Output_Max rPres_Cur
+div rTemp1 rTemp1 cPress_Output_Max
+mul rVP_Set_Heat rVP_Set_Heat rTemp1
+mul rVP_Set_Cool rVP_Set_Cool rTemp1
+max rVP_Set_Heat rVP_Set_Heat 0
+max rVP_Set_Cool rVP_Set_Cool 0
+min rVP_Set_Heat rVP_Set_Heat 100
+min rVP_Set_Cool rVP_Set_Cool 100
+jSet:
+brdns dLM_Error 2
+s dLM_Error Setting rError
+s dVP_Coolpipe Setting rVP_Set_Cool
+s dVP_Heatpipe Setting rVP_Set_Heat
+j jMainLoop
+jLowInputPressure:
+move rOn_VP 0
+s dVP_Coolpipe On rOn_VP
+s dVP_Heatpipe On rOn_VP
+move rError 404
+brdns dLM_Error 2
+s dLM_Error Setting rError
+j jMainLoop
