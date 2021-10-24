@@ -1,0 +1,24 @@
+alias dSuit db
+alias dHelmet d0
+jMainloop:
+yield
+l r0 dSuit PressureExternal
+sna r0 100 r0 0.4 # 60 > 166 kPa
+move r1 r0
+r0 dSuit TemperatureExternal
+sna r0 293 r0 0.06 # 2 > 38 C
+or r1 r0 r1
+l r0 dSuit RatioOxygen
+slt r0 r0 0.15 # > 15% O
+or r1 r0 r1
+l r0 dSuit RatioPollutant
+sgtz r0 r0 # 0% X
+or r1 r0 r1
+l r0 dSuit On
+beq r0 r1 jMainloop
+s dSuit On r1
+s dSuit Filtration r1
+s dSuit AirRelease r1
+nor r1 r1 0
+s dHelmet Open r1
+j jMainloop
