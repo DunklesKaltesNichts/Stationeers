@@ -1,0 +1,56 @@
+alias dGasStorage d0
+alias dVP d1
+alias dLEDDisplay d2
+define cMaxPressure 7500 # kPA
+define cMaxSmartPressure 15000 #kPA
+define cSmartCanHash -668314371
+define cMinCanFillRate 1 #L
+define cMaxCanFillRate 10 #L
+##
+alias rCanPressTarg r0
+alias rVPSetting r1
+alias rVPOn r2
+alias rLEDSetting r3
+alias rTemp r15
+alias rTemp2 r14
+jInit:
+brdns dLEDDisplay 2
+s dLEDDisplay Mode 1
+jMainLoop:
+yield
+ls rTemp dGasStorage 0 Occupied
+brnez rTemp 5
+s dLEDDisplay Setting 0
+move rVPOn 0
+s dVP On rVPOn
+j jMainLoop
+move rCanPressTarg cMaxPressure
+ls rTemp dGasStorage 0 OccupantHash
+brne rTemp cSmartCanHash 2
+move rCanPressTarg cMaxSmartPressure
+jal jFill
+j jMainLoop
+jFill:
+ls rTemp dGasStorage 0 Pressure
+div rTemp rTemp 1000 # pa to kPa
+s db Setting rTemp
+brdns dLEDDisplay 6
+div rLEDSetting rTemp rCanPressTarg
+mul rLEDSetting rLEDSetting 100
+floor rLEDSetting rLEDSetting
+div rLEDSetting rLEDSetting 100
+min rLEDSetting rLEDSetting 1
+s db Setting rLEDSetting
+s dLEDDisplay Setting rLEDSetting
+slt rTemp2 rTemp rCanPressTarg
+breq rTemp2 rVPOn 3
+move rVPOn rTemp2
+s dVP On rVPOn
+beqz rVPOn jMainLoop
+div rTemp rTemp rCanPressTarg
+mul rTemp rTemp 100
+sub rTemp 100 rTemp
+min rVPSetting rTemp cMaxCanFillRate
+max rVPSetting cMinCanFillRate rVPSetting
+s dVP Setting rVPSetting
+j ra
