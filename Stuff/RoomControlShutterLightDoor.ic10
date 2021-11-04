@@ -1,0 +1,38 @@
+alias dLight d0
+alias dDoor d1
+alias dBtnShutter d4
+alias dBtnLight d5
+define cDoorWaitTime 30 # yields (0.5s)
+##
+define cShutterHash 2056377335
+alias rLightOn r0
+alias rShutterOpen r1
+alias rDoorOpen r2
+alias rTemp r15
+jMainLoop:
+yield
+l rTemp dBtnShutter Activate
+bgtzal rTemp jToggleShutter
+l rTemp dBtnLight Activate
+bgtzal rTemp jToggleLight
+l rTemp dDoor open
+bgtzal rTemp jDoorOpen
+j jMainLoop
+jToggleShutter:
+sub rShutterOpen rShutterOpen 1
+abs rShutterOpen rShutterOpen
+sb cShutterHash Open rShutterOpen
+j ra
+jToggleLight:
+sub rLightOn rLightOn 1
+abs rLightOn rLightOn
+s dLight On rLightOn
+j ra
+jDoorOpen:
+brgtz rDoorOpen 3
+move rDoorOpen cDoorWaitTime
+j ra
+sub rDoorOpen rDoorOpen 1
+bgtz rDoorOpen ra
+s dDoor Open rDoorOpen
+j ra
