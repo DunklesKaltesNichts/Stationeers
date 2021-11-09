@@ -1,0 +1,79 @@
+define cPres_Targ_Max 5000 # kPA
+define cRatio_Targ_O2 22
+define cRatio_Targ_CO2 10
+define cRatio_Targ_N 68
+define cRatio_Diff_Max 1 # %
+define cVP_Flow_Max 100
+define cVP_Flow_Min 0
+##
+alias dVP_O2 d0
+alias dVP_CO2 d1
+alias dVP_N d2
+alias dPA_Output d3
+##
+alias rPres_Cur r0
+alias rRatio_Cur_O2 r1
+alias rRatio_Cur_CO2 r2
+alias rRatio_Cur_N r3
+alias rVP_Set_O2 r4
+alias rVP_Set_CO2 r5
+alias rVP_Set_N r6
+alias rPres_Diff r7
+alias rVP_On r8
+alias rTemp1 r15
+alias rTemp2 r14
+alias rTemp3 r13
+alias rVP_Calc_Return r12
+jInit:
+
+jMainLoop:
+yield
+l rPres_Cur dPA_Output Pressure
+slt rVP_On rPres_Cur cPres_Targ_Max
+s dVP_O2 On rVP_On
+s dVP_CO2 On rVP_On
+s dVP_N On rVP_On
+## Read current Ratios
+l rRatio_Cur_O2 dPA_Output RatioOxygen
+mul rRatio_Cur_O2 rRatio_Cur_O2 100
+l rRatio_Cur_CO2 dPA_Output RatioCarbonDioxide
+mul rRatio_Cur_CO2 rRatio_Cur_CO2 100
+l rRatio_Cur_N dPA_Output RatioNitrogen
+mul rRatio_Cur_N rRatio_Cur_N 100
+sub rTemp1 cPres_Targ_Max rPres_Cur
+div rPres_Diff rTemp1 cPres_Targ_Max
+## Oxygen
+div rTemp3 cRatio_Diff_Max 100
+sna rTemp1 rRatio_Cur_O2 cRatio_Targ_O2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_O2
+move rTemp2 cRatio_Targ_O2
+jal jCalcPumpValRatio
+move rVP_Set_O2 rVP_Calc_Return
+# Carbon Dioxide
+sna rTemp1 rRatio_Cur_CO2 cRatio_Targ_CO2 rTemp3
+breqz rTemp1 6
+move rTemp1 rRatio_Cur_CO2
+move rTemp2 cRatio_Targ_CO2
+jal jCalcPumpValRatio
+move rVP_Set_CO2 rVP_Calc_Return
+# Nitrogen
+sna rTemp1 rRatio_Cur_N cRatio_Targ_N rTemp3
+breqz rTemp1 5
+move rTemp1 rRatio_Cur_N
+move rTemp2 cRatio_Targ_N
+jal jCalcPumpValRatio
+move rVP_Set_N rVP_Calc_Return
+s dVP_O2 Setting rVP_Set_O2
+s dVP_CO2 Setting rVP_Set_CO2
+s dVP_N Setting rVP_Set_N
+j jMainLoop
+##
+jCalcPumpValRatio:
+sub rTemp1 rTemp2 rTemp1
+mul rTemp1 rTemp1 rPres_Diff
+min rVP_Calc_Return rTemp1 100
+max rVP_Calc_Return rVP_Calc_Return 0
+#abs rTemp1 rTemp1
+j ra
+j jMainLoop
