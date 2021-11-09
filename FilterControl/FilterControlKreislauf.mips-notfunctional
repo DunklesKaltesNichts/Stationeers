@@ -1,0 +1,72 @@
+alias dPAMainInp d0
+alias dPAFiltInp d1
+alias dFiltration d2
+alias dVABypass d3
+alias dVPInput d4
+alias dLED d5
+define cMaxInputPressure 900 #kPA
+define cMaxGasValue 0
+define cGas 17 #LogicType.RatioPollutant For sim
+define cValidFilterHash 1959564765 #X
+define cMinFilterQuant 10
+define cInitStateFilter 0
+##
+alias rFilterOn r0
+alias rErrorCode r1
+alias rVPSetting r2
+alias rTemp r15
+alias rTemp2 r14
+jInit:
+move rFilterOn cInitStateFilter
+move rErrorCode 400
+jMainLoop:
+jal jDoit
+yield
+move rErrorCode 400
+jal jCheckFilterHash
+jal jCheckFilterQuant
+jal jCheckRatio
+jal jCheckInputPressure
+j jMainLoop
+jCheckInputPressure:
+l rTemp dPAFiltInp Pressure
+div rTemp rTemp cMaxInputPressure 
+mul rTemp rTemp 100
+sub rVPSetting 100 rTemp
+min rVPSetting rVPSetting 100
+max rVPSetting rVPSetting 0 
+floor rVPSetting rVPSetting 
+j ra
+jCheckRatio:
+l rTemp dPAMainInp RatioPollutant
+sgt rFilterOn rTemp cMaxGasValue
+j ra
+jCheckFilterHash:
+ls rTemp dFiltration 0 PrefabHash
+sne rTemp2 cValidFilterHash rTemp
+ls rTemp dFiltration 1 PrefabHash
+sne rTemp cValidFilterHash rTemp
+or rTemp rTemp rTemp2
+beqz rTemp ra
+move rFilterOn 0
+move rErrorCode 401
+j jMainLoop
+jCheckFilterQuant:
+ls rTemp dFiltration 0 Quantity
+ls rTemp2 dFiltration 1 Quantity
+add rTemp rTemp rTemp2
+bgt rTemp cMinFilterQuant ra
+move rErrorCode 404
+j jMainLoop
+jDoit:
+s db Setting rErrorCode
+s dFiltration On rFilterOn
+s dVPInput On rFilterOn
+s dVPInput Setting rVPSetting
+sub rTemp rFilterOn 1
+abs rTemp rTemp
+s dVABypass On rTemp
+brdns dLED 3
+sgt rTemp rErrorCode 400
+s dLED On rTemp
+j ra
