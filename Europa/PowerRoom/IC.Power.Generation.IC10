@@ -1,0 +1,29 @@
+alias dCA.Wind.1 d0
+alias dCA.Wind.2 d1
+alias dCA.Solar d2
+alias dLED.Wind d3
+alias dLED.Solar d4
+alias dLED.Total d5
+##
+alias rTotal.Wind r0
+alias rTotal.Solar r1
+alias rTotal r2
+alias rTemp r15
+alias rTemp2 r14
+jInit:
+s dLED.Wind Mode 2
+s dLED.Solar Mode 2
+s dLED.Total Mode 2
+jMainLoop:
+yield
+l rTemp dCA.Wind.1 PowerActual
+add rTotal.Wind rTotal.Wind rTemp
+l rTemp dCA.Wind.2 PowerActual
+add rTotal.Wind rTotal.Wind rTemp
+l rTotal.Solar dCA.Solar PowerActual
+add rTotal rTotal.Solar rTotal.Wind
+s dLED.Wind Setting rTotal.Wind
+s dLED.Solar Setting rTotal.Solar
+s dLED.Total Setting rTotal
+s db Setting rTotal
+j jMainLoop
