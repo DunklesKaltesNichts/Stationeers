@@ -1,0 +1,25 @@
+alias dCA.MainsLine.1 d0
+alias dCA.MainsLine.2 d1
+alias dLED.Line.1 d3
+alias dLED.Line.2 d4
+alias dLED.Total d5
+##
+alias rLine.1 r0
+alias rLine.2 r1
+alias rTotal r2
+alias rTemp r15
+alias rTemp2 r14
+jInit:
+s dLED.Line.1 Mode 2
+s dLED.Line.2 Mode 2
+s dLED.Total Mode 2
+jMainLoop:
+yield
+l rLine.1 dCA.MainsLine.1 PowerActual
+l rLine.2 dCA.MainsLine.2 PowerActual
+add rTotal rLine.1 rLine.2
+s dLED.Line.1 Setting rLine.1
+s dLED.Line.2 Setting rLine.2
+s dLED.Total Setting rTotal
+s db Setting rTotal
+j jMainLoop
