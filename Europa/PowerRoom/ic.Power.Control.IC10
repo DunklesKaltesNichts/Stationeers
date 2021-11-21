@@ -1,19 +1,26 @@
+## Error Codes
+# 400 No Error
+# 401 Battery low
+# 402 Battery Critical
 alias dLM.Ratio d0
 alias dIC.Generation d1
 alias dIC.Usage d2
 alias dLED.Ratio d3
 alias dLED.Balance d4
-define dBattery.Warning 0.2
-define dBattery.Alert 0.1
+define dBattery.Warning 0.2 # 401
+define dBattery.Alert  0.1  # 402
 ##
 alias rBalance r0
 alias rRatio r1
+alias rError r2
 alias rTemp r15
 alias rTemp2 r14
 jInit:
 s dLED.Ratio Mode 1
 s dLED.Balance Mode 2
 jMainLoop:
+yield
+move rError 400
 l rTemp dIC.Usage Setting
 l rTemp2 dIC.Generation Setting
 sub rTemp rTemp rTemp2
@@ -32,10 +39,13 @@ div rTemp rTemp 100
 beq rTemp rRatio jMainLoop
 move rRatio rTemp
 move rTemp 2
-brgt rRatio dBattery.Warning 4
+brgt rRatio dBattery.Warning 6
 move rTemp 5
-brgt rRatio dBattery.Alert 2
+move rError 401
+brgt rRatio dBattery.Alert 3
 move rTemp 4
+move rError 402
 s dLED.Ratio Setting rRatio
 s dLED.Ratio Color rTemp
+s db Setting rError
 j jMainLoop
