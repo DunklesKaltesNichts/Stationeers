@@ -1,0 +1,41 @@
+alias dLM.Ratio d0
+alias dIC.Generation d1
+alias dIC.Usage d2
+alias dLED.Ratio d3
+alias dLED.Balance d4
+define dBattery.Warning 0.2
+define dBattery.Alert 0.1
+##
+alias rBalance r0
+alias rRatio r1
+alias rTemp r15
+alias rTemp2 r14
+jInit:
+s dLED.Ratio Mode 1
+s dLED.Balance Mode 2
+jMainLoop:
+l rTemp dIC.Usage Setting
+l rTemp2 dIC.Generation Setting
+sub rTemp rTemp rTemp2
+beq rTemp rBalance jCheckRatio
+move rBalance rTemp
+move rTemp 2
+brgtz rBalance 2
+move rTemp 4
+s dLED.Balance Color rTemp
+s dLED.Balance Setting rBalance
+jCheckRatio:
+l rTemp dLM.Ratio Setting
+mul rTemp rTemp 100
+floor rTemp rTemp
+div rTemp rTemp 100
+beq rTemp rRatio jMainLoop
+move rRatio rTemp
+move rTemp 2
+brgt rRatio dBattery.Warning 4
+move rTemp 5
+brgt rRatio dBattery.Alert 2
+move rTemp 4
+s dLED.Ratio Setting rRatio
+s dLED.Ratio Color rTemp
+j jMainLoop
