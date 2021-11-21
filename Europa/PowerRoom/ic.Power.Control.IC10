@@ -23,7 +23,7 @@ yield
 move rError 400
 l rTemp dIC.Usage Setting
 l rTemp2 dIC.Generation Setting
-sub rTemp rTemp rTemp2
+sub rTemp rTemp2 rTemp
 beq rTemp rBalance jCheckRatio
 move rBalance rTemp
 move rTemp 2
