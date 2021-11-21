@@ -16,8 +16,7 @@ s dLED.Solar Mode 2
 s dLED.Total Mode 2
 jMainLoop:
 yield
-l rTemp dCA.Wind.1 PowerActual
-add rTotal.Wind rTotal.Wind rTemp
+l rTotal.Wind dCA.Wind.1 PowerActual
 l rTemp dCA.Wind.2 PowerActual
 add rTotal.Wind rTotal.Wind rTemp
 l rTotal.Solar dCA.Solar PowerActual
