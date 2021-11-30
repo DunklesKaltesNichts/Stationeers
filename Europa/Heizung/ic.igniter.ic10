@@ -1,0 +1,107 @@
+alias VPHydrogen d0
+alias VPOxygen d1
+alias VPExit d2
+alias PAIgnition d3
+alias PATHydrogen d4
+alias PATOxygen d5
+
+define LightHash 576516101
+define SpeakerHash -828056979
+define FlashHash -1535893860
+define PressLimit 500
+define TempDiffLimit 20
+define MolLimit 30
+define PressureWarningLimit 3000
+
+alias calc r0
+alias FurnaceState r1
+alias PipePress r2
+alias th r3
+alias to r4
+alias Diff r5
+alias ph r6
+alias po r7
+alias vh r8
+alias vo r9
+alias IngiState r10
+alias IngiPressure r11
+alias WarningCode r12
+alias InputGasRatio r13
+
+s PAIgnition On 1
+s VPHydrogen Lock 1
+s VPOxygen Lock 1
+s VPExit Lock 1
+Empty:
+s VPOxygen On 0
+s VPHydrogen On 0
+yield
+l IngiState PAIgnition Combustion
+bgtz IngiState Empty
+sb LightHash On 0
+s VPExit On 1
+l PipePress PAIgnition Pressure
+ble PipePress PressLimit CheckClearance
+j Empty
+CheckClearance:
+yield
+s VPHydrogen On 0
+s VPOxygen On 0
+s VPExit On 0
+l th PATHydrogen Temperature
+l to PATOxygen Temperature
+mul calc 1.933649289 th
+sub calc 948.0087678 calc
+sub Diff to calc
+bgt Diff TempDiffLimit CalcRatio
+s db Setting 406
+j CheckClearance
+CalcRatio:
+l ph PATHydrogen Pressure
+l po PATOxygen Pressure
+mul calc 8.3144 MolLimit
+mul calc calc th
+div vh calc ph
+l InputGasRatio PATHydrogen RatioVolatiles
+div vh vh InputGasRatio
+mul calc ph to
+div calc calc 2
+div calc calc po
+div calc calc th
+mul vo calc vh
+l InputGasRatio PATOxygen RatioOxygen
+div vo vo InputGasRatio
+blt vo 100 Ignition
+move vo 100
+div vh vo calc
+move WarningCode vh
+bgt vh 100 Warning
+Ignition:
+max calc vh vo
+s db Setting calc
+sb LightHash On 1
+s VPHydrogen On 1
+s VPOxygen On 1
+
+s VPHydrogen Setting vh
+s VPOxygen Setting vo
+IgniWait:
+yield
+l IngiState PAIgnition Combustion
+bgtz IngiState Empty
+l IngiPressure PAIgnition Pressure
+move WarningCode 500
+bgt IngiPressure PressureWarningLimit Warning
+j IgniWait
+Warning:
+s PAIgnition On 0
+s VPHydrogen On 0
+s VPOxygen On 0
+s VPExit On 0
+sb SpeakerHash On 1
+sb FlashHash On 1
+s db Setting WarningCode
+yield
+l calc PAIgnition On
+bgtz calc Empty
+j Warning
