@@ -1,0 +1,71 @@
+alias dPA.Volatiles d0
+alias dPA.Oxygen d1
+alias dPA.Combustion d2
+alias dVP.Exit d3
+alias dGM d4
+alias dConsole d5
+##
+define cInput.Press.Min 500 #kPA
+define cRatio 2 # Input1 : Input2; 2:1
+##
+alias rRunning r0
+alias rConsole.Setting r1
+alias rConsole.Color r2
+alias rGM.Ratio r3
+alias rInput.Press.Min r4
+alias rTemp1 r15
+alias rTemp2 r14
+alias rTemp3 r13
+jInit:
+move rInput.Press.Min cInput.Press.Min
+move rRunning 0
+move rConsole.Setting -1
+move rConsole.Color 1
+s dPA.Volatiles On 1
+s dPA.Oxygen On 1
+s dPA.Combustion On 1
+j jDoit
+jMainLoop:
+yield
+l rTemp1 db Setting
+move rConsole.Color 1
+move rConsole.Setting -1
+blt rTemp1 400 jOff
+# Check Input Pressure
+move rConsole.Setting 404
+move rConsole.Color 4
+move rRunning 1
+l rTemp1 dPA.Volatiles Pressure
+blt rTemp1 rInput.Press.Min jOff
+l rTemp1 dPA.Oxygen Pressure
+blt rTemp1 rInput.Press.Min jOff
+move rConsole.Setting 400
+move rConsole.Color 2
+## calc Ratio
+l rTemp1 dPA.Volatiles Temperature
+l rTemp2 dPA.Oxygen Temperature
+mul rTemp1 rTemp1 cRatio
+add rTemp2 rTemp2 rTemp1
+div rTemp1 rTemp1 rTemp2
+mul rTemp1 rTemp1 100
+floor rTemp1 rTemp1
+breq rTemp1 rGM.Ratio 3
+move rGM.Ratio rTemp1
+s dGM Setting rGM.Ratio
+#Check for Combustion
+l rTemp1 dPA.Combustion Combustion
+select rConsole.Color rTemp1 rConsole.Color 10
+select rConsole.Setting rTemp1 rConsole.Setting 403
+j jDoit
+j jMainLoop
+jOff:
+beqz rRunning jMainLoop
+move rRunning 0
+j jDoit
+jDoit:
+s dGM On rRunning
+s dVP.Exit On rRunning
+s dGM Setting rGM.Ratio
+s dConsole Setting rConsole.Setting
+s dConsole Color rConsole.Color
+j jMainLoop
