@@ -1,81 +1,73 @@
-define cTemp_Init 293 #K
-define cPress_Output_Max 5000 #kPa
-define cPress_Output_Min 3000 #kPa
-define cPress_Input_Min 300 #kPa
+alias dPA.Nitrogen d0
+alias dPA.Oxygen d1
+alias dPA.CarbonDioxde d2
+alias dVP.Nitrogen d3
+alias dVP.Oxygen d4
+alias dVP.CO2 d5
 ##
-alias dPA_Coolpipe d0
-alias dPA_Heatpipe d1
-alias dPA_Main_Output d2
-alias dVP_Coolpipe d3
-alias dVP_Heatpipe d4
-alias dLM_Error d5
-alias rTemp_Targ r0
-alias rTemp_Coolpipe_Cur r3
-alias rTemp_Heatpipe_Cur r4
-alias rOn_VP r5
-alias rError r6
-alias rPres_Cur r7
-alias rVP_Set_Cool r8
-alias rVP_Set_Heat r9
-alias rTemp_Cur r10
-alias rRatio r11
-alias rFlow r12
+define cGasConst 8.3144
+define cNitrogen.Ratio .68
+define cOxygen.Ratio .22
+define cCO2.Ratio .10
+define cPressure.Target 5000 #kPA
+##
+alias rMol.Total r0
+alias rVP.Nitrogen.Setting r1
+alias rVP.Oxygen.Setting r2
+alias rVP.CO2.Setting r3
+alias rPressureRatio r4
 alias rTemp1 r15
 alias rTemp2 r14
-jInit:
-s db Setting cTemp_Init
+alias rTemp3 r13
+alias rCounter r12
 jMainLoop:
 yield
-move rError 400
-l rTemp1 dPA_Coolpipe Pressure
-blt rTemp1 cPress_Input_Min jLowInputPressure
-l rTemp1 dPA_Heatpipe Pressure
-blt rTemp1 cPress_Input_Min jLowInputPressure
-l rPres_Cur dPA_Main_Output Pressure
-brgtz rOn_VP 5
-slt rOn_VP rPres_Cur cPress_Output_Min
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-j jCalc
-slt rOn_VP rPres_Cur cPress_Output_Max
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-jCalc:
-l rTemp_Targ db Setting
-l rTemp_Coolpipe_Cur dPA_Coolpipe Temperature
-l rTemp_Heatpipe_Cur dPA_Heatpipe Temperature
-l rTemp_Cur dPA_Main_Output Temperature
-sub rTemp1 cPress_Output_Max rPres_Cur
-div rRatio rTemp1 cPress_Output_Max
-mul rFlow 100 rRatio
-sub rTemp1 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur
-div rTemp1 100 rTemp1
-mul rTemp2 rTemp_Coolpipe_Cur rTemp_Heatpipe_Cur 
-div rTemp2 rTemp2 rTemp_Targ
-sub rTemp2 rTemp2 rTemp_Heatpipe_Cur
-mul rTemp2 rTemp2 rTemp1
-round rTemp2 rTemp2 
-div rTemp2 rTemp2 100
-div rTemp1 rTemp_Targ rTemp_Cur
-mul rVP_Set_Heat rFlow rTemp2
-mul rVP_Set_Heat rVP_Set_Heat rTemp1
-sub rVP_Set_Cool rFlow rVP_Set_Heat
-max rVP_Set_Heat rVP_Set_Heat 0
-max rVP_Set_Cool rVP_Set_Cool 0
-min rVP_Set_Heat rVP_Set_Heat 100
-min rVP_Set_Cool rVP_Set_Cool 100
-
-jSet:
-brdns dLM_Error 2
-s dLM_Error Setting rError
-s dVP_Coolpipe Setting rVP_Set_Cool
-s dVP_Heatpipe Setting rVP_Set_Heat
+l rPressureRatio db Setting
+brle rPressureRatio 0.38 2
+move rPressureRatio 0.38
+move rMol.Total 0
+move rCounter 0
+jCalcMolsTotal:
+l rTemp1 dr12 Pressure
+l rTemp2 dr12 Temperature
+mul rTemp1 rTemp1 100
+mul rTemp2 rTemp2 cGasConst
+div rTemp1 rTemp1 rTemp2
+add rMol.Total rMol.Total rTemp1
+add rCounter rCounter 1
+blt rCounter 4 jCalcMolsTotal
+floor rMol.Total rMol.Total
+# Nitrogen
+move rTemp1 cNitrogen.Ratio
+move rCounter 0
+jal jCalcVPSetting
+breq rTemp1 rVP.Nitrogen.Setting 3
+move rVP.Nitrogen.Setting rTemp1
+s dVP.Nitrogen Setting rVP.Nitrogen.Setting
+# oxygen
+move rTemp1 cOxygen.Ratio
+move rCounter 1
+jal jCalcVPSetting
+breq rTemp1 rVP.Oxygen.Setting 3
+move rVP.Oxygen.Setting rTemp1
+s dVP.Oxygen Setting rVP.Oxygen.Setting
+# CO2
+move rTemp1 cCO2.Ratio
+move rCounter 2
+jal jCalcVPSetting
+breq rTemp1 rVP.CO2.Setting 3
+move rVP.CO2.Setting rTemp1
+s dVP.CO2 Setting rVP.CO2.Setting
 j jMainLoop
-jLowInputPressure:
-move rOn_VP 0
-s dVP_Coolpipe On rOn_VP
-s dVP_Heatpipe On rOn_VP
-move rError 404
-brdns dLM_Error 2
-s dLM_Error Setting rError
-j jMainLoop
+jCalcVPSetting:
+l rTemp2 dr12 Pressure
+l rTemp3 dr12 Temperature
+mul rTemp1 rMol.Total rTemp1
+mul rTemp1 rTemp1 cGasConst
+mul rTemp1 rTemp1 rTemp3
+div rTemp1 rTemp1 rTemp2
+mul rTemp1 rTemp1 rPressureRatio
+max rTemp1 rTemp1 0
+min rTemp1 rTemp1 100
+floor rTemp1 rTemp1
+j ra
