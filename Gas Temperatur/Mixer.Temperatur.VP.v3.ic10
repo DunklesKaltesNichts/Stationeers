@@ -10,7 +10,7 @@ define cNitrogen.Ratio .68
 define cOxygen.Ratio .22
 define cCO2.Ratio .10
 define cPressure.Target 5000 #kPA
-define cPipeVolumeInput 100 # Pipes before VP
+define cPipeVolume.Input 100 # Pipes before VP
 ##
 alias rMol.Total r0
 alias rVP.Nitrogen.Setting r1
@@ -31,7 +31,7 @@ move rCounter 0
 jCalcMolsTotal:
 l rTemp1 dr12 Pressure
 l rTemp2 dr12 Temperature
-mul rTemp1 rTemp1 cPipeVolumeInput
+mul rTemp1 rTemp1 cPipeVolume.Input
 mul rTemp2 rTemp2 cGasConst
 div rTemp1 rTemp1 rTemp2
 add rMol.Total rMol.Total rTemp1
