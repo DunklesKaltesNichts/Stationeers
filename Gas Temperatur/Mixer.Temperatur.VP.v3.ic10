@@ -36,7 +36,7 @@ div rTemp1 rTemp1 rTemp2
 add rMol.Total rMol.Total rTemp1
 add rCounter rCounter 1
 blt rCounter 4 jCalcMolsTotal
-floor rMol.Total rMol.Total
+round rMol.Total rMol.Total
 # Nitrogen
 move rTemp1 cNitrogen.Ratio
 move rCounter 0
@@ -69,5 +69,5 @@ div rTemp1 rTemp1 rTemp2
 mul rTemp1 rTemp1 rPressureRatio
 max rTemp1 rTemp1 0
 min rTemp1 rTemp1 100
-floor rTemp1 rTemp1
+round rTemp1 rTemp1
 j ra
