@@ -1,0 +1,19 @@
+alias dLightSensor d0
+define cNightLight 1 # 1 = Light at night, 0 = light at day
+alias rLightState r15
+jInit:
+push 1514476632 # round light
+push 143612188 # round light small
+push 1592905386 # round light angled
+jMainLoop:
+yield
+l r0 dLightSensor Activate
+sub r0 r0 cNightLight
+abs r0 r0
+beq r0 rLightState jMainLoop
+move rLightState r0
+jLoop:
+pop r0
+sb r0 On rLightState
+bgtz sp jLoop
+j jMainLoop
