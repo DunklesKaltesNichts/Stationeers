@@ -1,0 +1,7 @@
+jMainLoop:
+yield # warte 0.5s
+l r0 d0 Activate # Lese Button an d0
+beqz r0 jMainLoop # Button gedrueckt?
+nor r1 r1 r1 # Toggle
+sb -1668992663 On r1 # Batchwrite Electrolyzer on
+j jMainLoop #Springe zum Anfang
