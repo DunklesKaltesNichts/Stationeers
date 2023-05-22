@@ -16,7 +16,7 @@ current 254 Transmitter and Receiver per bus.
 ### Packet Format
 `AACCRRDDDD`
 
-`AA`: 8 bits, target address, $00 and $FF (255) are reserved  
+`AA`: 8 bits, target address, $00 and $FF are reserved  
 `CC`: 8 bits, command, $00 and $FF are reserved  
 `RR`: 8 bits, status code, $00 and $FF are reserved  
 `DDDD`: 16 Bits, Values
