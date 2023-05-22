@@ -15,8 +15,7 @@ current 254 Transmitter and Receiver per bus.
 
 `AA`: 8 bits, target address, $00 and $FF (255) are reserved  
 `CC`: 8 bits, command, $00 and $FF are reserved  
-`RR`: 8 bits, status code, $00 are reserved  
-
+`RR`: 8 4its, status code, $00 are reserved  
 `DDDD`: 16 Bits, Values
 
 
