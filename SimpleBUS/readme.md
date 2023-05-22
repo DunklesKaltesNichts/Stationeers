@@ -36,7 +36,7 @@ $00 or $FF should be set at the command.
 
 Response: 
 
-100: OK, command understood, possible answer in the process
+100: OK, command understood, possible answer in the values
 
 200: CMD Fail, command not available  
 201: CMD Fail, command available, values not available  
