@@ -1,8 +1,11 @@
 New attempt of a bus.
 
-this is a master - servants bus system.
-many masters ask for things and the servants answer.
-This time with bitwise operations.
+this is a master - servants bus system.  
+many masters ask for things and the servants answer.  
+This time with bitwise operations.  
+A logic memory is the "BUS" here
+
+
 
 Limits:
 
